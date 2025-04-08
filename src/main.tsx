@@ -8,9 +8,10 @@ import { ErrorBoundary } from './routes/components';
 
 // ----------------------------------------------------------------------
 
+// Setup the router
 const router = createBrowserRouter([
   {
-    Component: () => (
+    element: (
       <App>
         <Outlet />
       </App>
@@ -20,7 +21,12 @@ const router = createBrowserRouter([
   },
 ]);
 
-const root = createRoot(document.getElementById('root')!);
+// ----------------------------------------------------------------------
+
+const rootElement = document.getElementById('root');
+if (!rootElement) throw new Error('Failed to find the root element');
+
+const root = createRoot(rootElement);
 
 root.render(
   <StrictMode>
