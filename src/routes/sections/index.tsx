@@ -6,6 +6,7 @@ import { Navigate } from 'react-router';
 import { CONFIG } from 'src/global-config';
 
 import { authRoutes } from './auth';
+import { adminRoutes } from './admin';
 import { dashboardRoutes } from './dashboard';
 
 // ----------------------------------------------------------------------
@@ -20,6 +21,9 @@ export const routesSection: RouteObject[] = [
 
   // Auth
   ...authRoutes,
+
+  // Admin
+  ...adminRoutes,
 
   // Dashboard
   ...dashboardRoutes,

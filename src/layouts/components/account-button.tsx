@@ -10,7 +10,7 @@ import { varTap, varHover, AnimateBorder, transitionTap } from 'src/components/a
 // ----------------------------------------------------------------------
 
 export type AccountButtonProps = IconButtonProps & {
-  photoURL: string;
+  photoURL: string | null;
   displayName: string;
 };
 
@@ -32,7 +32,18 @@ export function AccountButton({ photoURL, displayName, sx, ...other }: AccountBu
           secondaryBorder: { sx: { color: 'warning.main' } },
         }}
       >
-        <Avatar src={photoURL} alt={displayName} sx={{ width: 1, height: 1 }}>
+        <Avatar
+          src={photoURL || undefined}
+          alt={displayName}
+          sx={{
+            width: 1,
+            height: 1,
+            ...(!photoURL && {
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+            }),
+          }}
+        >
           {displayName?.charAt(0).toUpperCase()}
         </Avatar>
       </AnimateBorder>
