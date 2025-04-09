@@ -49,26 +49,36 @@ export const navData: NavSectionProps['data'] = [
    * Overview
    */
   {
-    subheader: 'Overview',
+    subheader: 'Pacific First Aid',
     items: [
       {
-        title: 'One',
-        path: paths.dashboard.root,
-        icon: ICONS.dashboard,
-        info: <Label>v{CONFIG.appVersion}</Label>,
+        title: 'Admin',
+        path: paths.admin.root,
+        icon: ICONS.user,
+        info: <Label>{CONFIG.appVersion}</Label>,
       },
-      { title: 'Two', path: paths.dashboard.two, icon: ICONS.ecommerce },
-      { title: 'Three', path: paths.dashboard.three, icon: ICONS.analytics },
+      { title: 'Program', path: paths.dashboard.two, icon: ICONS.ecommerce },
+      { title: 'Marketing', path: paths.dashboard.three, icon: ICONS.analytics },
+      {
+        title: 'Warehouse',
+        path: paths.dashboard.three,
+        icon: ICONS.analytics,
+        children: [
+          { title: 'AMCARE', path: paths.dashboard.group.root },
+          { title: 'Amazon', path: paths.dashboard.group.five },
+          { title: 'Shopify', path: paths.dashboard.group.six },
+        ],
+      },
     ],
   },
   /**
    * Management
    */
   {
-    subheader: 'Management',
+    subheader: 'Pacific Fresh Produce',
     items: [
       {
-        title: 'Group',
+        title: 'Inventory',
         path: paths.dashboard.group.root,
         icon: ICONS.user,
         children: [

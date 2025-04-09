@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useMsal } from '@azure/msal-react';
 import { useSetState } from 'minimal-shared/hooks';
 
@@ -12,6 +12,16 @@ type Props = {
   children: React.ReactNode;
 };
 
+const extractEmail = (email: string) => {
+  // Handle Microsoft tenant email format (e.g., 'user_gmail.com#EXT#@domain.onmicrosoft.com')
+  const match = email.match(/^([^#]+)#EXT#@/);
+  if (match) {
+    // Replace underscore with @ in the extracted part
+    return match[1].replace('_', '@');
+  }
+  return email;
+};
+
 export function MsalAuthProvider({ children }: Props) {
   const { instance, accounts } = useMsal();
   const { state, setState } = useSetState<AuthState>({ user: null, loading: true });
@@ -22,12 +32,53 @@ export function MsalAuthProvider({ children }: Props) {
         if (accounts.length > 0) {
           const account = accounts[0];
           instance.setActiveAccount(account);
+
+          // Get access token for Microsoft Graph API
+          let response;
+          try {
+            response = await instance.acquireTokenSilent({
+              scopes: ['User.Read', 'User.ReadBasic.All'],
+              account: account,
+            });
+          } catch (error) {
+            // If silent token acquisition fails, try interactive
+            response = await instance.acquireTokenPopup({
+              scopes: ['User.Read', 'User.ReadBasic.All'],
+              account: account,
+            });
+          }
+
+          // Fetch user data from Microsoft Graph API
+          const userResponse = await fetch('https://graph.microsoft.com/v1.0/me', {
+            headers: {
+              Authorization: `Bearer ${response.accessToken}`,
+            },
+          });
+
+          if (!userResponse.ok) {
+            throw new Error('Failed to fetch user data');
+          }
+
+          const userData = await userResponse.json();
+
+          // Get the first letter of the display name for the fallback avatar
+          const firstLetter = userData.displayName?.charAt(0).toUpperCase() || '?';
+
+          // Extract the actual email address
+          const email = extractEmail(userData.mail || userData.userPrincipalName);
+
           setState({
             user: {
               id: account.homeAccountId,
-              email: account.username,
-              displayName: account.name,
+              email,
+              displayName: userData.displayName,
               role: 'admin',
+              photoURL: null, // We'll use the first letter as fallback
+              firstLetter, // Add first letter for the avatar
+              jobTitle: userData.jobTitle || null,
+              department: userData.department || null,
+              companyName: userData.companyName || null,
+              officeLocation: userData.officeLocation || null,
             },
             loading: false,
           });
