@@ -4,6 +4,7 @@ const ROOTS = {
   AUTH: '/auth',
   DASHBOARD: '/dashboard',
   ADMIN: '/admin',
+  PFP: '/pfp',
 };
 
 // ----------------------------------------------------------------------
@@ -56,10 +57,22 @@ export const paths = {
     },
   },
 
+  /**
+   * Pacific First Aid
+   */
+
   // ADMIN
   admin: {
     root: ROOTS.ADMIN,
   },
 
   // WAREHOUSE
+
+  /**
+   * Pacific Fresh Produce
+   */
+
+  pfp: {
+    produceList: `${ROOTS.PFP}/produce-list`,
+  },
 };
