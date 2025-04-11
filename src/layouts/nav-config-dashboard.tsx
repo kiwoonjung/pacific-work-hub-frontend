@@ -40,6 +40,7 @@ const ICONS = {
   analytics: icon('ic-analytics'),
   dashboard: icon('ic-dashboard'),
   parameter: icon('ic-parameter'),
+  cart: icon('ic-cart'),
 };
 
 // ----------------------------------------------------------------------
@@ -71,22 +72,55 @@ export const navData: NavSectionProps['data'] = [
       },
     ],
   },
+
   /**
-   * Management
+   * Pacific Fresh Produce
    */
   {
     subheader: 'Pacific Fresh Produce',
     items: [
       {
-        title: 'Inventory',
-        path: paths.dashboard.group.root,
-        icon: ICONS.user,
+        title: 'Produce List',
+        path: paths.pfp.produceList,
+        icon: ICONS.cart,
+      },
+      {
+        title: 'Order',
+        path: paths.dashboard.two,
+        icon: ICONS.ecommerce,
         children: [
-          { title: 'Four', path: paths.dashboard.group.root },
-          { title: 'Five', path: paths.dashboard.group.five },
-          { title: 'Six', path: paths.dashboard.group.six },
+          { title: 'Recieved', path: paths.dashboard.two, icon: ICONS.ecommerce },
+          { title: 'Shipped', path: paths.dashboard.two, icon: ICONS.ecommerce },
+        ],
+      },
+      {
+        title: 'Contact',
+        path: paths.dashboard.two,
+        icon: ICONS.ecommerce,
+        children: [
+          { title: 'Cash Customer', path: paths.dashboard.two, icon: ICONS.ecommerce },
+          { title: 'PFP Client', path: paths.dashboard.two, icon: ICONS.ecommerce },
         ],
       },
     ],
   },
 ];
+
+/**
+ * Management
+ */
+// {
+//   subheader: 'Pacific Fresh Produce',
+//   items: [
+//     {
+//       title: 'Inventory',
+//       path: paths.dashboard.group.root,
+//       icon: ICONS.user,
+//       children: [
+//         { title: 'Four', path: paths.dashboard.group.root },
+//         { title: 'Five', path: paths.dashboard.group.five },
+//         { title: 'Six', path: paths.dashboard.group.six },
+//       ],
+//     },
+//   ],
+// },

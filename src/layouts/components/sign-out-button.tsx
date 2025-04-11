@@ -2,7 +2,7 @@ import type { ButtonProps } from '@mui/material/Button';
 
 import { useNavigate } from 'react-router';
 import { useMsal } from '@azure/msal-react';
-import { useCallback, useState } from 'react';
+import { useState, useCallback } from 'react';
 
 import Button from '@mui/material/Button';
 
