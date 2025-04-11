@@ -1,7 +1,9 @@
 import * as React from 'react';
 
+import { Button } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
+import AddIcon from '@mui/icons-material/Add';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -154,6 +156,18 @@ export default function StickyHeadTable() {
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        sx={{
+          position: 'absolute',
+          top: -45,
+          right: 0,
+          zIndex: 9,
+        }}
+      >
+        Create
+      </Button>
       <TableContainer sx={{ height: 607 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>

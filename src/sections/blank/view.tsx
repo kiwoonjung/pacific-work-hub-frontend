@@ -4,8 +4,6 @@ import type { Theme, SxProps } from '@mui/material/styles';
 import { varAlpha } from 'minimal-shared/utils';
 
 import Box from '@mui/material/Box';
-import { Button } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import Typography from '@mui/material/Typography';
 
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -34,19 +32,6 @@ export function BlankView({ title = 'Blank', sx, children }: Props) {
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}
     >
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        sx={{
-          position: 'absolute',
-          top: -45,
-          right: 0,
-          zIndex: 9,
-        }}
-      >
-        Create
-      </Button>
-
       {children}
     </Box>
   );
