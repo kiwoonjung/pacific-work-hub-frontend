@@ -26,7 +26,6 @@ import { AnimateBorder } from 'src/components/animate';
 
 import { useAuthContext } from 'src/auth/hooks';
 
-import { UpgradeBlock } from './nav-upgrade';
 import { AccountButton } from './account-button';
 import { SignOutButton } from './sign-out-button';
 

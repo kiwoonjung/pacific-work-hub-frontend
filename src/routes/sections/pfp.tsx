@@ -37,6 +37,6 @@ export const pfpRoutes: RouteObject[] = [
   {
     path: 'pfp',
     element: CONFIG.auth.skip ? dashboardLayout() : <AuthGuard>{dashboardLayout()}</AuthGuard>,
-    children: [{ element: <IndexPage />, index: true }],
+    children: [{ path: 'produce-list', element: <IndexPage />, index: true }],
   },
 ];

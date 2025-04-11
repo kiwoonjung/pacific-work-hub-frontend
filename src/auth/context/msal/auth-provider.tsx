@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useMsal } from '@azure/msal-react';
 import { useSetState } from 'minimal-shared/hooks';
 
@@ -38,13 +38,13 @@ export function MsalAuthProvider({ children }: Props) {
           try {
             response = await instance.acquireTokenSilent({
               scopes: ['User.Read', 'User.ReadBasic.All'],
-              account: account,
+              account,
             });
           } catch (error) {
             // If silent token acquisition fails, try interactive
             response = await instance.acquireTokenPopup({
               scopes: ['User.Read', 'User.ReadBasic.All'],
-              account: account,
+              account,
             });
           }
 
