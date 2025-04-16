@@ -3,13 +3,15 @@ import * as React from 'react';
 import { Button } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
-import AddIcon from '@mui/icons-material/Add';
+
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
+
+import CreateProduceItemButton from './create-produce-item-button';
 
 interface Column {
   id:
@@ -156,7 +158,8 @@ export default function StickyHeadTable() {
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <Button
+      <CreateProduceItemButton />
+      {/* <Button
         variant="contained"
         startIcon={<AddIcon />}
         sx={{
@@ -167,7 +170,7 @@ export default function StickyHeadTable() {
         }}
       >
         Create
-      </Button>
+      </Button> */}
       <TableContainer sx={{ height: 607 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
