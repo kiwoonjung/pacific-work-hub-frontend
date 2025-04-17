@@ -1,27 +1,31 @@
 import type { SelectChangeEvent } from '@mui/material/Select';
+
 import * as React from 'react';
+
+import AddIcon from '@mui/icons-material/Add';
 import {
   Box,
+  Grid,
   Button,
   Dialog,
+  Select,
+  MenuItem,
+  TextField,
+  InputLabel,
   DialogTitle,
+  FormControl,
+  Autocomplete,
   DialogContent,
   DialogActions,
-  TextField,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Autocomplete,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-
-import sizeList from 'src/assets/data/size-list';
-import originList from 'src/assets/data/origin-list';
-import typeOfPackage from 'src/assets/data/type-of-package-list';
-import scientificNameList from 'src/assets/data/scientific-name-list';
 
 import api from 'src/utils/axios';
+
+import sizeList from 'src/assets/data/pfp/size-list';
+import originList from 'src/assets/data/pfp/origin-list';
+import commonNameList from 'src/assets/data/pfp/common-name-list';
+import typeOfPackage from 'src/assets/data/pfp/type-of-package-list';
+import scientificNameList from 'src/assets/data/pfp/scientific-name-list';
 
 export default function CreateProduceItemButton() {
   const [open, setOpen] = React.useState(false);
@@ -34,13 +38,24 @@ export default function CreateProduceItemButton() {
   const [size, setSize] = React.useState('');
   const [packageType, setPackageType] = React.useState('');
   const [scientificName, setScientificName] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
 
   const handleClickOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setItemNo('');
+    setCommonName('');
+    setWeight('');
+    setUnit('');
+    setOrigin('');
+    setSize('');
+    setPackageType('');
+    setScientificName('');
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+    setLoading(true);
     const payload = {
       item_no: itemNo,
       common_name: commonName,
@@ -51,13 +66,13 @@ export default function CreateProduceItemButton() {
       package_type: packageType,
     };
 
-    console.log('payload', payload);
-
     try {
-      const response = await api.post('/produce-items', payload);
+      const response = await api.post('/pfp/produce/create-produce-itemsss', payload);
       console.log('Created item:', response.data);
+      setLoading(false);
       handleClose();
     } catch (err: any) {
+      setLoading(false);
       console.error('Failed to create produce item:', err.response?.data || err.message);
     }
   };
@@ -77,7 +92,15 @@ export default function CreateProduceItemButton() {
       >
         Create
       </Button>
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog
+        open={open}
+        onClose={(event, reason) => {
+          if (reason !== 'backdropClick') {
+            handleClose();
+          }
+        }}
+        fullWidth
+      >
         <form onSubmit={handleSubmit}>
           <DialogTitle>Create New Produce Item</DialogTitle>
           <DialogContent>
@@ -93,21 +116,23 @@ export default function CreateProduceItemButton() {
               value={itemNo}
               onChange={(e) => setItemNo(e.target.value)}
             />
-            <TextField
-              required
-              margin="dense"
-              id="common_name"
-              name="common_name"
-              label="Common Name"
+
+            <Autocomplete
+              sx={{ marginTop: 2 }}
               fullWidth
-              variant="standard"
-              value={commonName}
-              onChange={(e) => setCommonName(e.target.value)}
+              options={commonNameList}
+              value={commonName ? { label: commonName } : null}
+              onChange={(_, newValue) => setCommonName(newValue?.label || '')}
+              isOptionEqualToValue={(option, value) => option.label === value.label}
+              renderInput={(params) => (
+                <TextField {...params} label="Common Name" variant="standard" />
+              )}
             />
 
-            <Box sx={{ display: 'flex', gap: 2, marginTop: 2, alignItems: 'center' }}>
-              <FormControl sx={{ flex: 1 }} variant="standard">
+            <Grid container spacing={2} sx={{ marginTop: 2, alignItems: 'center' }}>
+              <Grid size={{ xs: 6 }}>
                 <Autocomplete
+                  fullWidth
                   options={originList}
                   value={origin ? { label: origin } : null}
                   onChange={(_, newValue) => setOrigin(newValue?.label || '')}
@@ -116,32 +141,36 @@ export default function CreateProduceItemButton() {
                     <TextField {...params} label="Origin" variant="standard" />
                   )}
                 />
-              </FormControl>
+              </Grid>
 
-              <TextField
-                margin="dense"
-                id="weight"
-                name="weight"
-                label="Weight"
-                variant="standard"
-                sx={{ width: 50, paddingBottom: 0.3 }}
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-              />
+              <Grid size={{ xs: 3 }}>
+                <TextField
+                  margin="dense"
+                  id="weight"
+                  name="weight"
+                  label="Weight"
+                  variant="standard"
+                  fullWidth
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                />
+              </Grid>
 
-              <FormControl variant="standard" sx={{ minWidth: 80 }}>
-                <InputLabel id="unit-label">Unit</InputLabel>
-                <Select
-                  labelId="unit-label"
-                  id="unit"
-                  value={unit}
-                  onChange={(e: SelectChangeEvent) => setUnit(e.target.value)}
-                >
-                  <MenuItem value="kg">KG</MenuItem>
-                  <MenuItem value="lbs">LBS</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
+              <Grid size={{ xs: 3 }}>
+                <FormControl variant="standard" fullWidth>
+                  <InputLabel id="unit-label">Unit</InputLabel>
+                  <Select
+                    labelId="unit-label"
+                    id="unit"
+                    value={unit}
+                    onChange={(e: SelectChangeEvent) => setUnit(e.target.value)}
+                  >
+                    <MenuItem value="kg">KG</MenuItem>
+                    <MenuItem value="lbs">LBS</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
 
             <Autocomplete
               sx={{ marginTop: 2 }}
@@ -186,7 +215,7 @@ export default function CreateProduceItemButton() {
             <Button variant="outlined" color="error" onClick={handleClose}>
               Cancel
             </Button>
-            <Button variant="contained" color="success" type="submit">
+            <Button variant="contained" color="success" type="submit" loading={loading}>
               Confirm
             </Button>
           </DialogActions>
