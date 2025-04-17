@@ -55,9 +55,8 @@ const columns: readonly Column[] = [
   },
   {
     id: 'weight',
-    label: 'Weight (In KG)',
+    label: 'Weight',
     // minWidth: 170,
-    align: 'right',
     // format: (value: number) => value.toFixed(2),
   },
   {

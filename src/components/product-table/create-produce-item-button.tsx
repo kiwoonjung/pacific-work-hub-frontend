@@ -1,44 +1,65 @@
+import type { SelectChangeEvent } from '@mui/material/Select';
 import * as React from 'react';
-
-import { Box } from '@mui/material';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import TextField from '@mui/material/TextField';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Autocomplete,
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import Autocomplete from '@mui/material/Autocomplete';
 
-import originList from 'src/assets/data/origin-list';
 import sizeList from 'src/assets/data/size-list';
+import originList from 'src/assets/data/origin-list';
 import typeOfPackage from 'src/assets/data/type-of-package-list';
 import scientificNameList from 'src/assets/data/scientific-name-list';
 
+import api from 'src/utils/axios';
+
 export default function CreateProduceItemButton() {
   const [open, setOpen] = React.useState(false);
+
+  const [itemNo, setItemNo] = React.useState('');
+  const [commonName, setCommonName] = React.useState('');
+  const [weight, setWeight] = React.useState('');
+  const [unit, setUnit] = React.useState('');
   const [origin, setOrigin] = React.useState('');
   const [size, setSize] = React.useState('');
+  const [packageType, setPackageType] = React.useState('');
+  const [scientificName, setScientificName] = React.useState('');
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+  const handleClickOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-  const handleOrigin = (event: SelectChangeEvent) => {
-    setOrigin(event.target.value as string);
-  };
+    const payload = {
+      item_no: itemNo,
+      common_name: commonName,
+      origin,
+      size,
+      weight: weight + ' ' + unit,
+      scientific_name: scientificName,
+      package_type: packageType,
+    };
 
-  const handleSize = (event: SelectChangeEvent) => {
-    setSize(event.target.value as string);
+    console.log('payload', payload);
+
+    try {
+      const response = await api.post('/produce-items', payload);
+      console.log('Created item:', response.data);
+      handleClose();
+    } catch (err: any) {
+      console.error('Failed to create produce item:', err.response?.data || err.message);
+    }
   };
 
   return (
@@ -56,120 +77,120 @@ export default function CreateProduceItemButton() {
       >
         Create
       </Button>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        slotProps={{
-          paper: {
-            component: 'form',
-            onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-              event.preventDefault();
-              const formData = new FormData(event.currentTarget);
-              const formJson = Object.fromEntries((formData as any).entries());
-              const email = formJson.email;
-              console.log(email);
-              handleClose();
-            },
-          },
-        }}
-      >
-        <DialogTitle>Create New Produce Item</DialogTitle>
-        <DialogContent>
-          {/* <DialogContentText>
-            To subscribe to this website, please enter your email address here. We will send updates
-            occasionally.
-          </DialogContentText> */}
-
-          <TextField
-            autoFocus
-            required
-            margin="dense"
-            id="item_no"
-            name="item_no"
-            label="Item No"
-            fullWidth
-            variant="standard"
-          />
-          <TextField
-            required
-            margin="dense"
-            id="common_name"
-            name="common_name"
-            label="Common Name"
-            fullWidth
-            variant="standard"
-          />
-
-          <Box sx={{ display: 'flex', gap: 2, marginTop: 2, alignItems: 'center' }}>
-            <FormControl sx={{ flex: 1 }} variant="standard">
-              <Autocomplete
-                disablePortal
-                options={originList}
-                fullWidth
-                renderInput={(params) => (
-                  <TextField {...params} label="Origin" variant="standard" />
-                )}
-              />
-            </FormControl>
-
+      <Dialog open={open} onClose={handleClose}>
+        <form onSubmit={handleSubmit}>
+          <DialogTitle>Create New Produce Item</DialogTitle>
+          <DialogContent>
             <TextField
+              autoFocus
+              required
               margin="dense"
-              id="weight"
-              name="weight"
-              label="Weight"
+              id="item_no"
+              name="item_no"
+              label="Item No"
+              fullWidth
               variant="standard"
-              sx={{ width: 50, paddingBottom: 0.36 }}
+              value={itemNo}
+              onChange={(e) => setItemNo(e.target.value)}
+            />
+            <TextField
+              required
+              margin="dense"
+              id="common_name"
+              name="common_name"
+              label="Common Name"
+              fullWidth
+              variant="standard"
+              value={commonName}
+              onChange={(e) => setCommonName(e.target.value)}
             />
 
-            <FormControl variant="standard" sx={{ minWidth: 100 }}>
-              <InputLabel id="select-2-label">Unit</InputLabel>
-              <Select labelId="select-2-label" id="select-2" value={size} onChange={handleSize}>
-                <MenuItem value="kg">KG</MenuItem>
-                <MenuItem value="lbs">LBS</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
+            <Box sx={{ display: 'flex', gap: 2, marginTop: 2, alignItems: 'center' }}>
+              <FormControl sx={{ flex: 1 }} variant="standard">
+                <Autocomplete
+                  options={originList}
+                  value={origin ? { label: origin } : null}
+                  onChange={(_, newValue) => setOrigin(newValue?.label || '')}
+                  isOptionEqualToValue={(option, value) => option.label === value.label}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Origin" variant="standard" />
+                  )}
+                />
+              </FormControl>
 
-          <Box sx={{ display: 'flex', gap: 2, marginTop: 2 }}>
+              <TextField
+                margin="dense"
+                id="weight"
+                name="weight"
+                label="Weight"
+                variant="standard"
+                sx={{ width: 50, paddingBottom: 0.3 }}
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+              />
+
+              <FormControl variant="standard" sx={{ minWidth: 80 }}>
+                <InputLabel id="unit-label">Unit</InputLabel>
+                <Select
+                  labelId="unit-label"
+                  id="unit"
+                  value={unit}
+                  onChange={(e: SelectChangeEvent) => setUnit(e.target.value)}
+                >
+                  <MenuItem value="kg">KG</MenuItem>
+                  <MenuItem value="lbs">LBS</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+
             <Autocomplete
-              disablePortal
-              options={sizeList}
+              sx={{ marginTop: 2 }}
               fullWidth
+              options={sizeList}
+              value={size ? { label: size } : null}
+              onChange={(_, newValue) => setSize(newValue?.label || '')}
+              isOptionEqualToValue={(option, value) => option.label === value.label}
               renderInput={(params) => <TextField {...params} label="Size" variant="standard" />}
             />
 
             <Autocomplete
-              disablePortal
-              options={typeOfPackage}
+              sx={{ marginTop: 2 }}
               fullWidth
+              options={typeOfPackage}
+              value={packageType ? { label: packageType } : null}
+              onChange={(_, newValue) => setPackageType(newValue?.label || '')}
+              isOptionEqualToValue={(option, value) => option.label === value.label}
               renderInput={(params) => (
                 <TextField {...params} label="Type of Package" variant="standard" />
               )}
             />
-          </Box>
 
-          <Box>
-            <Autocomplete
-              disablePortal
-              options={scientificNameList}
-              fullWidth
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  margin="dense"
-                  id="scientific-name"
-                  name="scientific-name"
-                  label="Scientific Name"
-                  variant="standard"
-                />
-              )}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit">Subscribe</Button>
-        </DialogActions>
+            <Box sx={{ marginTop: 2 }}>
+              <Autocomplete
+                options={scientificNameList}
+                value={scientificName ? { label: scientificName } : null}
+                onChange={(_, newValue) => setScientificName(newValue?.label || '')}
+                isOptionEqualToValue={(option, value) => option.label === value.label}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    margin="dense"
+                    label="Scientific Name"
+                    variant="standard"
+                  />
+                )}
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button variant="outlined" color="error" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button variant="contained" color="success" type="submit">
+              Confirm
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
     </React.Fragment>
   );
