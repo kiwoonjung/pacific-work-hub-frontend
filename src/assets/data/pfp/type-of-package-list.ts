@@ -1,4 +1,4 @@
-const typeOfPackage = [
+const typeOfPackageList = [
   { label: 'Cardboard Box' },
   { label: 'Net Mesh Bag' },
   { label: 'Vacuum Pack' },
@@ -7,4 +7,4 @@ const typeOfPackage = [
   { label: 'Styrofoam Box' },
 ];
 
-export default typeOfPackage;
+export default typeOfPackageList;

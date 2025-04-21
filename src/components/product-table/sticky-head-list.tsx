@@ -28,6 +28,10 @@ import { DataInfo, TABLE_HEAD } from './pagination-with-api';
 
 import type { ApiResponse } from './pagination-with-api';
 
+import { endpoints } from 'src/lib/axios';
+
+import CreateProduceItemButton from './create-produce-item-button';
+
 // ----------------------------------------------------------------------
 
 const createFilteredEndpoint = (baseEndpoint: string, searchQuery: string, category: string) => {
@@ -38,7 +42,7 @@ const createFilteredEndpoint = (baseEndpoint: string, searchQuery: string, categ
 };
 
 const createBaseEndpoint = (page = 1, rowsPerPage = 5) =>
-  `/api/pagination?page=${page}&perPage=${rowsPerPage}`;
+  `${endpoints.produce.list}?page=${page}&perPage=${rowsPerPage}`;
 
 // ----------------------------------------------------------------------
 
@@ -62,7 +66,7 @@ export default function TablePaginationWithApi() {
   }, [page, rowsPerPage]);
 
   const canReset = !!searchQuery || !!category;
-  const notFound = !data?.products.length && canReset;
+  const notFound = !data?.items.length && canReset;
 
   const onSubmit = useCallback(() => {
     const updatedEndpoint = createFilteredEndpoint(defaultEndpoint, searchQuery, category);
@@ -78,7 +82,7 @@ export default function TablePaginationWithApi() {
   }, [defaultEndpoint, onResetPage]);
 
   const renderFiltersToolbar = () => (
-    <Box sx={{ px: 3, gap: 1, mb: 3, display: 'flex', alignItems: 'center' }}>
+    <Box sx={{ px: 3, gap: 1, mb: 3, mt: 3, display: 'flex', alignItems: 'center' }}>
       <TextField
         fullWidth
         value={searchQuery}
@@ -94,7 +98,7 @@ export default function TablePaginationWithApi() {
           },
         }}
       />
-      <TextField
+      {/* <TextField
         select
         fullWidth
         label="Category"
@@ -113,7 +117,7 @@ export default function TablePaginationWithApi() {
             {option}
           </MenuItem>
         ))}
-      </TextField>
+      </TextField> */}
 
       {canReset && (
         <Button variant="soft" size="large" color="error" onClick={onReset} sx={{ flexShrink: 0 }}>
@@ -135,11 +139,8 @@ export default function TablePaginationWithApi() {
 
   return (
     <>
-      <DataInfo
-        endpoint={endpoint}
-        totalItems={data?.totalItems ?? 0}
-        totalPages={data?.totalPages ?? 0}
-      />
+      <CreateProduceItemButton />
+      {/* <DataInfo totalItems={data?.totalItems ?? 0} totalPages={data?.totalPages ?? 0} /> */}
 
       {renderFiltersToolbar()}
 
@@ -158,11 +159,15 @@ export default function TablePaginationWithApi() {
               {notFound ? (
                 <TableNoData notFound={notFound} />
               ) : (
-                data?.products.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell>{row.id}</TableCell>
-                    <TableCell>{row.name}</TableCell>
-                    <TableCell>{row.category}</TableCell>
+                data?.items.map((row) => (
+                  <TableRow key={row.item_no}>
+                    <TableCell>{row.item_no}</TableCell>
+                    <TableCell>{row.common_name}</TableCell>
+                    <TableCell>{row.origin}</TableCell>
+                    <TableCell>{row.size}</TableCell>
+                    <TableCell>{row.weight}</TableCell>
+                    <TableCell>{row.scientific_name}</TableCell>
+                    <TableCell>{row.type_of_package}</TableCell>
                     <TableCell align="right">
                       <IconButton>
                         <Iconify icon="eva:more-vertical-fill" />

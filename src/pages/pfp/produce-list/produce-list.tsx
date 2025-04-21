@@ -11,7 +11,7 @@ export default function Page() {
   return (
     <>
       <title>{metadata.title}</title>
-      <BlankView title="Produe List">
+      <BlankView title="Produce List">
         <StickyHeadTable />
       </BlankView>
     </>

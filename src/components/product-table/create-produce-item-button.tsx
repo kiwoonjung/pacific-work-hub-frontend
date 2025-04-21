@@ -19,12 +19,13 @@ import {
   DialogActions,
 } from '@mui/material';
 
-import api from 'src/utils/axios';
+import { fetcher, endpoints } from 'src/lib/axios';
+import useSWR, { mutate } from 'swr';
 
 import sizeList from 'src/assets/data/pfp/size-list';
 import originList from 'src/assets/data/pfp/origin-list';
 import commonNameList from 'src/assets/data/pfp/common-name-list';
-import typeOfPackage from 'src/assets/data/pfp/type-of-package-list';
+import typeOfPackageList from 'src/assets/data/pfp/type-of-package-list';
 import scientificNameList from 'src/assets/data/pfp/scientific-name-list';
 
 export default function CreateProduceItemButton() {
@@ -36,9 +37,12 @@ export default function CreateProduceItemButton() {
   const [unit, setUnit] = React.useState('');
   const [origin, setOrigin] = React.useState('');
   const [size, setSize] = React.useState('');
-  const [packageType, setPackageType] = React.useState('');
+  const [typeOfPackage, setTypeOfPackage] = React.useState('');
   const [scientificName, setScientificName] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+
+  // Fetch current list of produce items using SWR
+  const { data, isLoading } = useSWR(endpoints.produce.list, fetcher);
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => {
@@ -49,7 +53,7 @@ export default function CreateProduceItemButton() {
     setUnit('');
     setOrigin('');
     setSize('');
-    setPackageType('');
+    setTypeOfPackage('');
     setScientificName('');
   };
 
@@ -63,14 +67,18 @@ export default function CreateProduceItemButton() {
       size,
       weight: weight + ' ' + unit,
       scientific_name: scientificName,
-      package_type: packageType,
+      type_of_package: typeOfPackage,
     };
 
     try {
-      const response = await api.post('/pfp/produce/create-produce-itemsss', payload);
-      console.log('Created item:', response.data);
+      const response = await fetcher([endpoints.produce.create, { method: 'POST', data: payload }]);
+      console.log('Created item:', response);
       setLoading(false);
       handleClose();
+
+      // After creating the new item, update the SWR cache for produce list
+      // This will re-fetch the produce items list
+      mutate(endpoints.produce.list);
     } catch (err: any) {
       setLoading(false);
       console.error('Failed to create produce item:', err.response?.data || err.message);
@@ -125,7 +133,7 @@ export default function CreateProduceItemButton() {
               onChange={(_, newValue) => setCommonName(newValue?.label || '')}
               isOptionEqualToValue={(option, value) => option.label === value.label}
               renderInput={(params) => (
-                <TextField {...params} label="Common Name" variant="standard" />
+                <TextField {...params} label="Common Name" variant="standard" required />
               )}
             />
 
@@ -184,39 +192,33 @@ export default function CreateProduceItemButton() {
 
             <Autocomplete
               sx={{ marginTop: 2 }}
+              options={scientificNameList}
+              value={scientificName ? { label: scientificName } : null}
+              onChange={(_, newValue) => setScientificName(newValue?.label || '')}
+              isOptionEqualToValue={(option, value) => option.label === value.label}
+              renderInput={(params) => (
+                <TextField {...params} margin="dense" label="Scientific Name" variant="standard" />
+              )}
+            />
+
+            <Autocomplete
+              sx={{ marginTop: 2 }}
               fullWidth
-              options={typeOfPackage}
-              value={packageType ? { label: packageType } : null}
-              onChange={(_, newValue) => setPackageType(newValue?.label || '')}
+              options={typeOfPackageList}
+              value={typeOfPackage ? { label: typeOfPackage } : null}
+              onChange={(_, newValue) => setTypeOfPackage(newValue?.label || '')}
               isOptionEqualToValue={(option, value) => option.label === value.label}
               renderInput={(params) => (
                 <TextField {...params} label="Type of Package" variant="standard" />
               )}
             />
-
-            <Box sx={{ marginTop: 2 }}>
-              <Autocomplete
-                options={scientificNameList}
-                value={scientificName ? { label: scientificName } : null}
-                onChange={(_, newValue) => setScientificName(newValue?.label || '')}
-                isOptionEqualToValue={(option, value) => option.label === value.label}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    margin="dense"
-                    label="Scientific Name"
-                    variant="standard"
-                  />
-                )}
-              />
-            </Box>
           </DialogContent>
           <DialogActions>
             <Button variant="outlined" color="error" onClick={handleClose}>
               Cancel
             </Button>
-            <Button variant="contained" color="success" type="submit" loading={loading}>
-              Confirm
+            <Button variant="contained" color="success" type="submit" disabled={loading}>
+              {loading ? 'Creating...' : 'Confirm'}
             </Button>
           </DialogActions>
         </form>

@@ -20,23 +20,31 @@ import { TableSkeleton, TableHeadCustom } from 'src/components/table';
 
 // ----------------------------------------------------------------------
 
-type Product = {
-  id: string;
-  name: string;
-  category: string;
+type items = {
+  item_no: string;
+  common_name: string;
+  origin: string;
+  size: string;
+  weight: string;
+  scientific_name: string;
+  type_of_package: string;
 };
 
 export type ApiResponse = {
-  products: Product[];
+  items: items[];
   totalPages: number;
   totalItems: number;
   categoryOptions: string[];
 };
 
 export const TABLE_HEAD: TableHeadCellProps[] = [
-  { id: 'id', label: 'Id', width: 140 },
-  { id: 'name', label: 'Name', width: 240 },
-  { id: 'category', label: 'Category' },
+  { id: 'item_no', label: 'Item No' },
+  { id: 'common_name', label: 'Common Name' },
+  { id: 'origin', label: 'Origin' },
+  { id: 'size', label: 'Size' },
+  { id: 'weight', label: 'Weight' },
+  { id: 'scientific_name', label: 'Scientific Name' },
+  { id: 'type_of_package', label: 'Type of Package' },
   { id: '', label: 'Action', align: 'right', width: 80 },
 ];
 
@@ -54,11 +62,7 @@ export function PaginationWithApi() {
 
   return (
     <>
-      <DataInfo
-        endpoint={endpoint}
-        totalItems={data?.totalItems ?? 0}
-        totalPages={data?.totalPages ?? 0}
-      />
+      <DataInfo totalItems={data?.totalItems ?? 0} totalPages={data?.totalPages ?? 0} />
 
       <Table>
         <TableHeadCustom headCells={TABLE_HEAD} />
@@ -67,11 +71,14 @@ export function PaginationWithApi() {
           {isLoading ? (
             <TableSkeleton rowCount={perPage} cellCount={TABLE_HEAD.length} sx={{ height: 69 }} />
           ) : (
-            data?.products.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell>{row.id}</TableCell>
-                <TableCell>{row.name}</TableCell>
-                <TableCell>{row.category}</TableCell>
+            data?.items.map((row) => (
+              <TableRow key={row.item_no}>
+                <TableCell>{row.item_no}</TableCell>
+                <TableCell>{row.common_name}</TableCell>
+                <TableCell>{row.origin}</TableCell>
+                <TableCell>{row.size}</TableCell>
+                <TableCell>{row.scientific_name}</TableCell>
+                <TableCell>{row.type_of_package}</TableCell>
                 <TableCell align="right">
                   <IconButton>
                     <Iconify icon="eva:more-vertical-fill" />
@@ -103,12 +110,11 @@ export function PaginationWithApi() {
 // ----------------------------------------------------------------------
 
 type DataInfoProps = BoxProps & {
-  endpoint: string;
   totalItems: number;
   totalPages: number;
 };
 
-export function DataInfo({ endpoint, totalItems, totalPages, sx, ...other }: DataInfoProps) {
+export function DataInfo({ totalItems, totalPages, sx, ...other }: DataInfoProps) {
   return (
     <Box
       sx={[
@@ -124,12 +130,12 @@ export function DataInfo({ endpoint, totalItems, totalPages, sx, ...other }: Dat
       ]}
       {...other}
     >
-      <Box sx={{ flexGrow: 1 }}>
+      {/* <Box sx={{ flexGrow: 1 }}>
         <strong>endpoint:</strong>
         <Box component="span" sx={{ color: 'primary.main' }}>
           {endpoint}
         </Box>
-      </Box>
+      </Box> */}
 
       <span>
         <strong>Items: </strong> {totalItems}
