@@ -1,5 +1,5 @@
-import useSWR from 'swr';
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
@@ -13,7 +13,7 @@ import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 
-import { fetcher } from 'src/lib/axios';
+import { fetcher, endpoints } from 'src/lib/axios';
 
 import { Iconify } from 'src/components/iconify';
 import {
@@ -28,20 +28,23 @@ import { DataInfo, TABLE_HEAD } from './pagination-with-api';
 
 import type { ApiResponse } from './pagination-with-api';
 
-import { endpoints } from 'src/lib/axios';
-
 import CreateProduceItemButton from './create-produce-item-button';
 
 // ----------------------------------------------------------------------
 
-const createFilteredEndpoint = (baseEndpoint: string, searchQuery: string, category: string) => {
+const createFilteredEndpoint = (
+  baseEndpoint: string,
+  searchQuery: string,
+  category: string,
+  page: number,
+  rowsPerPage: number
+) => {
   const withSearch = searchQuery ? `&search=${searchQuery.trim()}` : '';
   const withCategory = category ? `&category=${category}` : '';
-
-  return `${baseEndpoint}${withSearch}${withCategory}`;
+  return `${baseEndpoint}?page=${page + 1}&perPage=${rowsPerPage}${withSearch}${withCategory}`;
 };
 
-const createBaseEndpoint = (page = 1, rowsPerPage = 5) =>
+const getBaseEndpoint = (page = 1, rowsPerPage = 5) =>
   `${endpoints.produce.list}?page=${page}&perPage=${rowsPerPage}`;
 
 // ----------------------------------------------------------------------
@@ -52,27 +55,38 @@ export default function TablePaginationWithApi() {
   const [category, setCategory] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const defaultEndpoint = createBaseEndpoint();
+  const defaultEndpoint = useMemo(
+    () => getBaseEndpoint(page + 1, rowsPerPage),
+    [page, rowsPerPage]
+  );
+
   const [endpoint, setEndpoint] = useState(defaultEndpoint);
 
-  const { data, isLoading } = useSWR<ApiResponse>(endpoint, fetcher, {
-    keepPreviousData: true,
+  const { data, isLoading } = useQuery<ApiResponse>({
+    queryKey: ['produceItems', endpoint],
+    queryFn: () => fetcher(endpoint),
+    placeholderData: (previousData) => previousData,
   });
 
   useEffect(() => {
-    const updatedEndpoint = createBaseEndpoint(page + 1, rowsPerPage);
-
+    const updatedEndpoint = getBaseEndpoint(page + 1, rowsPerPage);
     setEndpoint(updatedEndpoint);
   }, [page, rowsPerPage]);
 
   const canReset = !!searchQuery || !!category;
-  const notFound = !data?.items.length && canReset;
+  const notFound = !data?.items?.length && canReset;
 
   const onSubmit = useCallback(() => {
-    const updatedEndpoint = createFilteredEndpoint(defaultEndpoint, searchQuery, category);
+    const updatedEndpoint = createFilteredEndpoint(
+      endpoints.produce.list,
+      searchQuery,
+      category,
+      page,
+      rowsPerPage
+    );
     setEndpoint(updatedEndpoint);
     onResetPage();
-  }, [category, defaultEndpoint, onResetPage, searchQuery]);
+  }, [category, searchQuery, page, rowsPerPage, onResetPage]);
 
   const onReset = useCallback(() => {
     setCategory('');
@@ -159,7 +173,7 @@ export default function TablePaginationWithApi() {
               {notFound ? (
                 <TableNoData notFound={notFound} />
               ) : (
-                data?.items.map((row) => (
+                data?.items?.map((row: any) => (
                   <TableRow key={row.item_no}>
                     <TableCell>{row.item_no}</TableCell>
                     <TableCell>{row.common_name}</TableCell>

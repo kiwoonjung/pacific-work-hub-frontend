@@ -1,6 +1,7 @@
 import type { SelectChangeEvent } from '@mui/material/Select';
 
 import * as React from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import AddIcon from '@mui/icons-material/Add';
 import {
@@ -20,16 +21,18 @@ import {
 } from '@mui/material';
 
 import { fetcher, endpoints } from 'src/lib/axios';
-import useSWR, { mutate } from 'swr';
-
 import sizeList from 'src/assets/data/pfp/size-list';
 import originList from 'src/assets/data/pfp/origin-list';
 import commonNameList from 'src/assets/data/pfp/common-name-list';
 import typeOfPackageList from 'src/assets/data/pfp/type-of-package-list';
 import scientificNameList from 'src/assets/data/pfp/scientific-name-list';
 
+import { useSnackbar } from 'src/components/snackbar/snackbar-context';
+
 export default function CreateProduceItemButton() {
   const [open, setOpen] = React.useState(false);
+  const { showSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
 
   const [itemNo, setItemNo] = React.useState('');
   const [commonName, setCommonName] = React.useState('');
@@ -41,8 +44,25 @@ export default function CreateProduceItemButton() {
   const [scientificName, setScientificName] = React.useState('');
   const [loading, setLoading] = React.useState(false);
 
-  // Fetch current list of produce items using SWR
-  const { data, isLoading } = useSWR(endpoints.produce.list, fetcher);
+  const createMutation = useMutation({
+    mutationFn: (payload: any) =>
+      fetcher([endpoints.produce.create, { method: 'POST', data: payload }]),
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ['produceItems'] });
+      setLoading(false);
+      handleClose();
+      showSnackbar('Item created successfully!', 'success');
+    },
+    onError: (error: any) => {
+      setLoading(false);
+      console.error('Failed to create produce item:', error.response?.data || error.message);
+      showSnackbar(
+        'Failed to create item: ' + (error.response?.data?.error || error.message),
+        'error'
+      );
+    },
+  });
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => {
@@ -59,7 +79,6 @@ export default function CreateProduceItemButton() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setLoading(true);
     const payload = {
       item_no: itemNo,
       common_name: commonName,
@@ -70,19 +89,7 @@ export default function CreateProduceItemButton() {
       type_of_package: typeOfPackage,
     };
 
-    try {
-      const response = await fetcher([endpoints.produce.create, { method: 'POST', data: payload }]);
-      console.log('Created item:', response);
-      setLoading(false);
-      handleClose();
-
-      // After creating the new item, update the SWR cache for produce list
-      // This will re-fetch the produce items list
-      mutate(endpoints.produce.list);
-    } catch (err: any) {
-      setLoading(false);
-      console.error('Failed to create produce item:', err.response?.data || err.message);
-    }
+    createMutation.mutate(payload);
   };
 
   return (

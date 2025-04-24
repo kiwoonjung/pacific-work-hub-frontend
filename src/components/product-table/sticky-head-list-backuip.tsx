@@ -155,7 +155,7 @@ export default function StickyHeadTable() {
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <CreateProduceItemButton />
+      {/* <CreateProduceItemButton /> */}
       <TableContainer sx={{ height: 607 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
