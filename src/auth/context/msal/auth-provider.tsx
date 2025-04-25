@@ -61,10 +61,24 @@ export function MsalAuthProvider({ children }: Props) {
 
           const userData = await userResponse.json();
 
-          // Get the first letter of the display name for the fallback avatar
-          const firstLetter = userData.displayName?.charAt(0).toUpperCase() || '?';
+          // Try to fetch user's profile photo
+          let photoURL = null;
+          try {
+            const photoResponse = await fetch('https://graph.microsoft.com/v1.0/me/photo/$value', {
+              headers: {
+                Authorization: `Bearer ${response.accessToken}`,
+              },
+            });
 
-          // Extract the actual email address
+            if (photoResponse.ok) {
+              const blob = await photoResponse.blob();
+              photoURL = URL.createObjectURL(blob);
+            }
+          } catch (err) {
+            console.warn('Unable to fetch profile photo:', err);
+          }
+
+          const firstLetter = userData.displayName?.charAt(0).toUpperCase() || '?';
           const email = extractEmail(userData.mail || userData.userPrincipalName);
 
           setState({
@@ -73,8 +87,8 @@ export function MsalAuthProvider({ children }: Props) {
               email,
               displayName: userData.displayName,
               role: 'admin',
-              photoURL: null, // We'll use the first letter as fallback
-              firstLetter, // Add first letter for the avatar
+              photoURL, // fetched photo blob URL
+              firstLetter,
               jobTitle: userData.jobTitle || null,
               department: userData.department || null,
               companyName: userData.companyName || null,

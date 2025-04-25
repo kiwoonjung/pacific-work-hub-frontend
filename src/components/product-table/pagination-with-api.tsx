@@ -38,6 +38,7 @@ export type ApiResponse = {
 };
 
 export const TABLE_HEAD: TableHeadCellProps[] = [
+  { id: 'id', label: 'ID' },
   { id: 'item_no', label: 'Item No' },
   { id: 'common_name', label: 'Common Name' },
   { id: 'origin', label: 'Origin' },
@@ -53,7 +54,7 @@ export const TABLE_HEAD: TableHeadCellProps[] = [
 export function PaginationWithApi() {
   const [page, setPage] = useState<number>(1);
 
-  const perPage = 5;
+  const perPage = 10;
 
   const endpoint = `/api/pagination?page=${page}&perPage=${perPage}`;
   const { data, isLoading } = useSWR<ApiResponse>(endpoint, fetcher, {

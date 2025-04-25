@@ -1,11 +1,12 @@
 import type { SelectChangeEvent } from '@mui/material/Select';
 
 import * as React from 'react';
+import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
 import {
-  Box,
   Grid,
   Button,
   Dialog,
@@ -13,6 +14,7 @@ import {
   MenuItem,
   TextField,
   InputLabel,
+  IconButton,
   DialogTitle,
   FormControl,
   Autocomplete,
@@ -29,27 +31,31 @@ import scientificNameList from 'src/assets/data/pfp/scientific-name-list';
 
 import { useSnackbar } from 'src/components/snackbar/snackbar-context';
 
-export default function CreateProduceItemButton() {
-  const [open, setOpen] = React.useState(false);
+type Props = {
+  endpoint: string;
+};
+
+export default function CreateProduceItemButton({ endpoint }: Props) {
+  const [open, setOpen] = useState(false);
   const { showSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
 
-  const [itemNo, setItemNo] = React.useState('');
-  const [commonName, setCommonName] = React.useState('');
-  const [weight, setWeight] = React.useState('');
-  const [unit, setUnit] = React.useState('');
-  const [origin, setOrigin] = React.useState('');
-  const [size, setSize] = React.useState('');
-  const [typeOfPackage, setTypeOfPackage] = React.useState('');
-  const [scientificName, setScientificName] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
+  const [itemNo, setItemNo] = useState('');
+  const [commonName, setCommonName] = useState('');
+  const [weight, setWeight] = useState('');
+  const [unit, setUnit] = useState('');
+  const [origin, setOrigin] = useState('');
+  const [size, setSize] = useState('');
+  const [typeOfPackage, setTypeOfPackage] = useState('');
+  const [scientificName, setScientificName] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const createMutation = useMutation({
     mutationFn: (payload: any) =>
       fetcher([endpoints.produce.create, { method: 'POST', data: payload }]),
-    onSuccess: () => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ['produceItems'] });
+    onSuccess: (data) => {
+      // Update the cache with the new data
+      queryClient.setQueryData(['produceItems', endpoint], data);
       setLoading(false);
       handleClose();
       showSnackbar('Item created successfully!', 'success');
@@ -118,6 +124,18 @@ export default function CreateProduceItemButton() {
       >
         <form onSubmit={handleSubmit}>
           <DialogTitle>Create New Produce Item</DialogTitle>
+          <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={(theme) => ({
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: theme.palette.grey[500],
+            })}
+          >
+            <CloseIcon />
+          </IconButton>
           <DialogContent>
             <TextField
               autoFocus
@@ -168,6 +186,7 @@ export default function CreateProduceItemButton() {
                   fullWidth
                   value={weight}
                   onChange={(e) => setWeight(e.target.value)}
+                  sx={{ marginBottom: 1 }}
                 />
               </Grid>
 

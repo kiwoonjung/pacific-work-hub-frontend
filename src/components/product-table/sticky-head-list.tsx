@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
+import Menu from '@mui/material/Menu';
+import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
@@ -12,6 +14,7 @@ import TableBody from '@mui/material/TableBody';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import TableContainer from '@mui/material/TableContainer';
 
 import { fetcher, endpoints } from 'src/lib/axios';
 
@@ -24,11 +27,11 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
-import { DataInfo, TABLE_HEAD } from './pagination-with-api';
+import { TABLE_HEAD } from './pagination-with-api';
+import EditProduceItemDialog from './edit-produce-item-dialog';
+import CreateProduceItemButton from './create-produce-item-button';
 
 import type { ApiResponse } from './pagination-with-api';
-
-import CreateProduceItemButton from './create-produce-item-button';
 
 // ----------------------------------------------------------------------
 
@@ -44,34 +47,65 @@ const createFilteredEndpoint = (
   return `${baseEndpoint}?page=${page + 1}&perPage=${rowsPerPage}${withSearch}${withCategory}`;
 };
 
-const getBaseEndpoint = (page = 1, rowsPerPage = 5) =>
-  `${endpoints.produce.list}?page=${page}&perPage=${rowsPerPage}`;
+const getBaseEndpoint = (page = 1, rowsPerPage = 10) => {
+  console.log('Creating endpoint with:', { page, rowsPerPage });
+  return `${endpoints.produce.list}?page=${page + 1}&perPage=${rowsPerPage}`;
+};
+
+const options = ['Edit', 'Delete'];
+const ITEM_HEIGHT = 48;
 
 // ----------------------------------------------------------------------
 
 export default function TablePaginationWithApi() {
-  const { page, rowsPerPage, onResetPage, onChangeRowsPerPage, onChangePage } = useTable();
+  const { page, rowsPerPage, onResetPage, onChangeRowsPerPage, onChangePage } = useTable({
+    defaultRowsPerPage: 10,
+  });
 
   const [category, setCategory] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  const defaultEndpoint = useMemo(
-    () => getBaseEndpoint(page + 1, rowsPerPage),
-    [page, rowsPerPage]
-  );
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleEditClick = () => {
+    handleClose(); // closes the menu
+    setEditDialogOpen(true);
+  };
+
+  const defaultEndpoint = useMemo(() => getBaseEndpoint(page, rowsPerPage), [page, rowsPerPage]);
 
   const [endpoint, setEndpoint] = useState(defaultEndpoint);
 
   const { data, isLoading } = useQuery<ApiResponse>({
     queryKey: ['produceItems', endpoint],
-    queryFn: () => fetcher(endpoint),
+    queryFn: async () => {
+      console.log('Fetching data with endpoint:', endpoint);
+      const response = await fetcher(endpoint);
+      console.log('Received data:', response);
+      return response;
+    },
     placeholderData: (previousData) => previousData,
   });
 
   useEffect(() => {
-    const updatedEndpoint = getBaseEndpoint(page + 1, rowsPerPage);
+    const updatedEndpoint = getBaseEndpoint(page, rowsPerPage);
+    console.log('Updating endpoint to:', updatedEndpoint);
     setEndpoint(updatedEndpoint);
   }, [page, rowsPerPage]);
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    console.log('Changing rows per page to:', newRowsPerPage);
+    onChangeRowsPerPage(event);
+    onResetPage();
+  };
 
   const canReset = !!searchQuery || !!category;
   const notFound = !data?.items?.length && canReset;
@@ -153,57 +187,107 @@ export default function TablePaginationWithApi() {
 
   return (
     <>
-      <CreateProduceItemButton />
-      {/* <DataInfo totalItems={data?.totalItems ?? 0} totalPages={data?.totalPages ?? 0} /> */}
+      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+        <CreateProduceItemButton endpoint={endpoint} />
+        {/* <DataInfo totalItems={data?.totalItems ?? 0} totalPages={data?.totalPages ?? 0} /> */}
 
-      {renderFiltersToolbar()}
+        {renderFiltersToolbar()}
 
-      <Table>
-        <TableHeadCustom headCells={TABLE_HEAD} />
+        <TableContainer sx={{ height: 520 }}>
+          <Table stickyHeader aria-label="sticky table">
+            <TableHeadCustom headCells={TABLE_HEAD} />
 
-        <TableBody>
-          {isLoading ? (
-            <TableSkeleton
-              rowCount={rowsPerPage}
-              cellCount={TABLE_HEAD.length}
-              sx={{ height: 69 }}
-            />
-          ) : (
-            <>
-              {notFound ? (
-                <TableNoData notFound={notFound} />
+            <TableBody>
+              {isLoading ? (
+                <TableSkeleton
+                  rowCount={rowsPerPage}
+                  cellCount={TABLE_HEAD.length}
+                  sx={{ height: 69 }}
+                />
               ) : (
-                data?.items?.map((row: any) => (
-                  <TableRow key={row.item_no}>
-                    <TableCell>{row.item_no}</TableCell>
-                    <TableCell>{row.common_name}</TableCell>
-                    <TableCell>{row.origin}</TableCell>
-                    <TableCell>{row.size}</TableCell>
-                    <TableCell>{row.weight}</TableCell>
-                    <TableCell>{row.scientific_name}</TableCell>
-                    <TableCell>{row.type_of_package}</TableCell>
-                    <TableCell align="right">
-                      <IconButton>
-                        <Iconify icon="eva:more-vertical-fill" />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))
+                <>
+                  {notFound ? (
+                    <TableNoData notFound={notFound} />
+                  ) : (
+                    data?.items?.map((row: any) => (
+                      <TableRow key={row.item_no}>
+                        <TableCell>{row.id}</TableCell>
+                        <TableCell>{row.item_no}</TableCell>
+                        <TableCell>{row.common_name}</TableCell>
+                        <TableCell>{row.origin}</TableCell>
+                        <TableCell>{row.size}</TableCell>
+                        <TableCell>{row.weight}</TableCell>
+                        <TableCell>{row.scientific_name}</TableCell>
+                        <TableCell>{row.type_of_package}</TableCell>
+                        <TableCell align="right">
+                          <IconButton
+                            aria-label="more"
+                            id="long-button"
+                            aria-controls={open ? 'long-menu' : undefined}
+                            aria-expanded={open ? 'true' : undefined}
+                            aria-haspopup="true"
+                            onClick={handleClick}
+                          >
+                            <Iconify icon="eva:more-vertical-fill" />
+                          </IconButton>
+                          <Menu
+                            id="long-menu"
+                            MenuListProps={{
+                              'aria-labelledby': 'long-button',
+                            }}
+                            anchorEl={anchorEl}
+                            open={open}
+                            onClose={handleClose}
+                            slotProps={{
+                              paper: {
+                                style: {
+                                  maxHeight: ITEM_HEIGHT * 4.5,
+                                  paddingRight: 10,
+                                  paddingLeft: 10,
+                                },
+                              },
+                            }}
+                          >
+                            {options.map((option) => (
+                              <MenuItem
+                                key={option}
+                                selected={option === 'Pyxis'}
+                                onClick={() => {
+                                  if (option === 'Edit') {
+                                    handleEditClick();
+                                  } else {
+                                    handleClose();
+                                  }
+                                }}
+                                sx={{
+                                  color: option === 'Delete' ? 'error.main' : 'text.primary',
+                                }}
+                              >
+                                {option}
+                              </MenuItem>
+                            ))}
+                          </Menu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </>
               )}
-            </>
-          )}
-        </TableBody>
-      </Table>
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <Divider />
 
-      <Divider />
-
-      <TablePaginationCustom
-        rowsPerPage={rowsPerPage}
-        page={isLoading ? 0 : page}
-        onPageChange={onChangePage}
-        count={isLoading ? 0 : (data?.totalItems ?? 0)}
-        onRowsPerPageChange={onChangeRowsPerPage}
-      />
+        <TablePaginationCustom
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={onChangePage}
+          count={data?.totalItems ?? 0}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPageOptions={[10, 25, 50]}
+        />
+      </Paper>
+      <EditProduceItemDialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} />
     </>
   );
 }
