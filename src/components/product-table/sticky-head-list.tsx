@@ -255,6 +255,7 @@ export default function TablePaginationWithApi() {
                                 onClick={() => {
                                   if (option === 'Edit') {
                                     handleEditClick();
+                                    console.log('option', row.id);
                                   } else {
                                     handleClose();
                                   }

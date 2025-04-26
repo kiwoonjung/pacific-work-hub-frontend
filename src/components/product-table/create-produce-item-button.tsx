@@ -243,7 +243,12 @@ export default function CreateProduceItemButton({ endpoint }: Props) {
             <Button variant="outlined" color="error" onClick={handleClose}>
               Cancel
             </Button>
-            <Button variant="contained" color="success" type="submit" disabled={loading}>
+            <Button
+              variant="contained"
+              color="success"
+              type="submit"
+              disabled={loading || !itemNo.trim() || !commonName.trim()}
+            >
               {loading ? 'Creating...' : 'Confirm'}
             </Button>
           </DialogActions>
