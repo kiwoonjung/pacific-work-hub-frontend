@@ -25,9 +25,10 @@ type items = {
   common_name: string;
   origin: string;
   size: string;
-  weight: string;
+  weight: number;
+  weight_unit: string;
   scientific_name: string;
-  type_of_package: string;
+  package_type: string;
 };
 
 export type ApiResponse = {
@@ -45,7 +46,7 @@ export const TABLE_HEAD: TableHeadCellProps[] = [
   { id: 'size', label: 'Size' },
   { id: 'weight', label: 'Weight' },
   { id: 'scientific_name', label: 'Scientific Name' },
-  { id: 'type_of_package', label: 'Type of Package' },
+  { id: 'package_type', label: 'Package Type' },
   { id: '', label: 'Action', align: 'right', width: 80 },
 ];
 
@@ -79,7 +80,7 @@ export function PaginationWithApi() {
                 <TableCell>{row.origin}</TableCell>
                 <TableCell>{row.size}</TableCell>
                 <TableCell>{row.scientific_name}</TableCell>
-                <TableCell>{row.type_of_package}</TableCell>
+                <TableCell>{row.package_type}</TableCell>
                 <TableCell align="right">
                   <IconButton>
                     <Iconify icon="eva:more-vertical-fill" />

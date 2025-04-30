@@ -1,7 +1,5 @@
-import type { SelectChangeEvent } from '@mui/material/Select';
-
-import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import AddIcon from '@mui/icons-material/Add';
@@ -20,13 +18,14 @@ import {
   Autocomplete,
   DialogContent,
   DialogActions,
+  CircularProgress,
 } from '@mui/material';
 
 import { fetcher, endpoints } from 'src/lib/axios';
 import sizeList from 'src/assets/data/pfp/size-list';
 import originList from 'src/assets/data/pfp/origin-list';
 import commonNameList from 'src/assets/data/pfp/common-name-list';
-import typeOfPackageList from 'src/assets/data/pfp/type-of-package-list';
+import packageTypeList from 'src/assets/data/pfp/type-of-package-list';
 import scientificNameList from 'src/assets/data/pfp/scientific-name-list';
 
 import { useSnackbar } from 'src/components/snackbar/snackbar-context';
@@ -39,16 +38,34 @@ export default function CreateProduceItemButton({ endpoint }: Props) {
   const [open, setOpen] = useState(false);
   const { showSnackbar } = useSnackbar();
   const queryClient = useQueryClient();
-
-  const [itemNo, setItemNo] = useState('');
-  const [commonName, setCommonName] = useState('');
-  const [weight, setWeight] = useState('');
-  const [unit, setUnit] = useState('');
-  const [origin, setOrigin] = useState('');
-  const [size, setSize] = useState('');
-  const [typeOfPackage, setTypeOfPackage] = useState('');
-  const [scientificName, setScientificName] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const {
+    handleSubmit,
+    register,
+    setValue,
+    trigger,
+    formState: { errors },
+    watch,
+    reset,
+  } = useForm({
+    defaultValues: {
+      item_no: '',
+      common_name: '',
+      weight: '',
+      weight_unit: '',
+      origin: '',
+      size: '',
+      package_type: '',
+      scientific_name: '',
+    },
+  });
+
+  const weightValue = watch('weight');
+
+  useEffect(() => {
+    trigger('weight_unit');
+  }, [weightValue, trigger]);
 
   const createMutation = useMutation({
     mutationFn: (payload: any) =>
@@ -57,8 +74,8 @@ export default function CreateProduceItemButton({ endpoint }: Props) {
       // Update the cache with the new data
       queryClient.setQueryData(['produceItems', endpoint], data);
       setLoading(false);
-      handleClose();
       showSnackbar('Item created successfully!', 'success');
+      handleClose();
     },
     onError: (error: any) => {
       setLoading(false);
@@ -70,36 +87,30 @@ export default function CreateProduceItemButton({ endpoint }: Props) {
     },
   });
 
-  const handleClickOpen = () => setOpen(true);
+  const handleClickOpen = () => {
+    reset();
+    setOpen(true);
+  };
   const handleClose = () => {
     setOpen(false);
-    setItemNo('');
-    setCommonName('');
-    setWeight('');
-    setUnit('');
-    setOrigin('');
-    setSize('');
-    setTypeOfPackage('');
-    setScientificName('');
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const onSubmit = (data: any) => {
     const payload = {
-      item_no: itemNo,
-      common_name: commonName,
-      origin,
-      size,
-      weight: weight + ' ' + unit,
-      scientific_name: scientificName,
-      type_of_package: typeOfPackage,
+      item_no: data.item_no,
+      common_name: data.common_name,
+      origin: data.origin,
+      size: data.size,
+      weight: data.weight === '' ? null : Number(data.weight),
+      weight_unit: data.weight_unit,
+      scientific_name: data.scientific_name,
+      package_type: data.package_type,
     };
-
     createMutation.mutate(payload);
   };
 
   return (
-    <React.Fragment>
+    <>
       <Button
         variant="contained"
         startIcon={<AddIcon />}
@@ -122,7 +133,7 @@ export default function CreateProduceItemButton({ endpoint }: Props) {
         }}
         fullWidth
       >
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <DialogTitle>Create New Produce Item</DialogTitle>
           <IconButton
             aria-label="close"
@@ -142,23 +153,29 @@ export default function CreateProduceItemButton({ endpoint }: Props) {
               required
               margin="dense"
               id="item_no"
-              name="item_no"
               label="Item No"
               fullWidth
               variant="standard"
-              value={itemNo}
-              onChange={(e) => setItemNo(e.target.value)}
+              {...register('item_no', { required: 'Item number is required' })}
+              error={!watch('item_no')?.trim()}
+              helperText={!watch('item_no')?.trim() ? 'Item number is required' : ''}
             />
 
             <Autocomplete
               sx={{ marginTop: 2 }}
               fullWidth
               options={commonNameList}
-              value={commonName ? { label: commonName } : null}
-              onChange={(_, newValue) => setCommonName(newValue?.label || '')}
-              isOptionEqualToValue={(option, value) => option.label === value.label}
+              value={commonNameList.find((opt) => opt.label === watch('common_name')) || null}
+              onChange={(_, newValue) => setValue('common_name', newValue?.label || '')}
               renderInput={(params) => (
-                <TextField {...params} label="Common Name" variant="standard" required />
+                <TextField
+                  {...params}
+                  label="Common Name"
+                  variant="standard"
+                  required
+                  error={!watch('common_name')?.trim()}
+                  helperText={!watch('common_name')?.trim() ? 'Common name is required' : ''}
+                />
               )}
             />
 
@@ -167,9 +184,8 @@ export default function CreateProduceItemButton({ endpoint }: Props) {
                 <Autocomplete
                   fullWidth
                   options={originList}
-                  value={origin ? { label: origin } : null}
-                  onChange={(_, newValue) => setOrigin(newValue?.label || '')}
-                  isOptionEqualToValue={(option, value) => option.label === value.label}
+                  value={originList.find((opt) => opt.label === watch('origin')) || null}
+                  onChange={(_, newValue) => setValue('origin', newValue?.label || '')}
                   renderInput={(params) => (
                     <TextField {...params} label="Origin" variant="standard" />
                   )}
@@ -180,28 +196,42 @@ export default function CreateProduceItemButton({ endpoint }: Props) {
                 <TextField
                   margin="dense"
                   id="weight"
-                  name="weight"
                   label="Weight"
                   variant="standard"
                   fullWidth
-                  value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
+                  {...register('weight')}
                   sx={{ marginBottom: 1 }}
+                  type="number"
                 />
               </Grid>
 
               <Grid size={{ xs: 3 }}>
                 <FormControl variant="standard" fullWidth>
-                  <InputLabel id="unit-label">Unit</InputLabel>
+                  <InputLabel id="weight-unit-label">Unit</InputLabel>
                   <Select
-                    labelId="unit-label"
-                    id="unit"
-                    value={unit}
-                    onChange={(e: SelectChangeEvent) => setUnit(e.target.value)}
+                    labelId="weight-unit-label"
+                    id="weight-unit"
+                    {...register('weight_unit', {
+                      validate: (value) => {
+                        if (watch('weight') && !value) {
+                          return 'Unit is required when weight is entered';
+                        }
+                        return true;
+                      },
+                    })}
+                    value={watch('weight_unit') || ''}
+                    onChange={(e) => {
+                      setValue('weight_unit', e.target.value);
+                      trigger('weight_unit');
+                    }}
+                    error={!!errors.weight_unit}
                   >
                     <MenuItem value="kg">KG</MenuItem>
                     <MenuItem value="lbs">LBS</MenuItem>
                   </Select>
+                  {errors.weight_unit && (
+                    <p style={{ color: 'red', fontSize: 12 }}>{errors.weight_unit.message}</p>
+                  )}
                 </FormControl>
               </Grid>
             </Grid>
@@ -210,8 +240,8 @@ export default function CreateProduceItemButton({ endpoint }: Props) {
               sx={{ marginTop: 2 }}
               fullWidth
               options={sizeList}
-              value={size ? { label: size } : null}
-              onChange={(_, newValue) => setSize(newValue?.label || '')}
+              value={sizeList.find((opt) => opt.label === watch('size')) || null}
+              onChange={(_, newValue) => setValue('size', newValue?.label || '')}
               isOptionEqualToValue={(option, value) => option.label === value.label}
               renderInput={(params) => <TextField {...params} label="Size" variant="standard" />}
             />
@@ -219,8 +249,10 @@ export default function CreateProduceItemButton({ endpoint }: Props) {
             <Autocomplete
               sx={{ marginTop: 2 }}
               options={scientificNameList}
-              value={scientificName ? { label: scientificName } : null}
-              onChange={(_, newValue) => setScientificName(newValue?.label || '')}
+              value={
+                scientificNameList.find((opt) => opt.label === watch('scientific_name')) || null
+              }
+              onChange={(_, newValue) => setValue('scientific_name', newValue?.label || '')}
               isOptionEqualToValue={(option, value) => option.label === value.label}
               renderInput={(params) => (
                 <TextField {...params} margin="dense" label="Scientific Name" variant="standard" />
@@ -230,9 +262,9 @@ export default function CreateProduceItemButton({ endpoint }: Props) {
             <Autocomplete
               sx={{ marginTop: 2 }}
               fullWidth
-              options={typeOfPackageList}
-              value={typeOfPackage ? { label: typeOfPackage } : null}
-              onChange={(_, newValue) => setTypeOfPackage(newValue?.label || '')}
+              options={packageTypeList}
+              value={packageTypeList.find((opt) => opt.label === watch('package_type')) || null}
+              onChange={(_, newValue) => setValue('package_type', newValue?.label || '')}
               isOptionEqualToValue={(option, value) => option.label === value.label}
               renderInput={(params) => (
                 <TextField {...params} label="Type of Package" variant="standard" />
@@ -247,13 +279,14 @@ export default function CreateProduceItemButton({ endpoint }: Props) {
               variant="contained"
               color="success"
               type="submit"
-              disabled={loading || !itemNo.trim() || !commonName.trim()}
+              disabled={loading || !watch('item_no')?.trim() || !watch('common_name')?.trim()}
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
             >
               {loading ? 'Creating...' : 'Confirm'}
             </Button>
           </DialogActions>
         </form>
       </Dialog>
-    </React.Fragment>
+    </>
   );
 }

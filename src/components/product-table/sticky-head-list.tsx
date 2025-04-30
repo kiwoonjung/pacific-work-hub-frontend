@@ -48,7 +48,7 @@ const createFilteredEndpoint = (
 };
 
 const getBaseEndpoint = (page = 1, rowsPerPage = 10) => {
-  console.log('Creating endpoint with:', { page, rowsPerPage });
+  // console.log('Creating endpoint with:', { page, rowsPerPage });
   return `${endpoints.produce.list}?page=${page + 1}&perPage=${rowsPerPage}`;
 };
 
@@ -64,17 +64,26 @@ export default function TablePaginationWithApi() {
 
   const [category, setCategory] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+  const [menuAnchor, setMenuAnchor] = useState<{
+    anchorEl: HTMLElement | null;
+    rowId: number | null;
+  }>({ anchorEl: null, rowId: null });
+
+  const isMenuOpen = (rowId: number) => menuAnchor.rowId === rowId && Boolean(menuAnchor.anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>, row: any) => {
+    setMenuAnchor({ anchorEl: event.currentTarget, rowId: row.id });
+    setSelectedItem(row);
   };
+
   const handleClose = () => {
-    setAnchorEl(null);
+    setMenuAnchor({ anchorEl: null, rowId: null });
   };
+
   const handleEditClick = (item: any) => {
     setSelectedItem(item);
     setEditDialogOpen(true);
@@ -88,9 +97,9 @@ export default function TablePaginationWithApi() {
   const { data, isLoading } = useQuery<ApiResponse>({
     queryKey: ['produceItems', endpoint],
     queryFn: async () => {
-      console.log('Fetching data with endpoint:', endpoint);
+      // console.log('Fetching data with endpoint:', endpoint);
       const response = await fetcher(endpoint);
-      console.log('Received data:', response);
+      // console.log('Received data:', response);
       return response;
     },
     placeholderData: (previousData) => previousData,
@@ -98,13 +107,13 @@ export default function TablePaginationWithApi() {
 
   useEffect(() => {
     const updatedEndpoint = getBaseEndpoint(page, rowsPerPage);
-    console.log('Updating endpoint to:', updatedEndpoint);
+    // console.log('Updating endpoint to:', updatedEndpoint);
     setEndpoint(updatedEndpoint);
   }, [page, rowsPerPage]);
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newRowsPerPage = parseInt(event.target.value, 10);
-    console.log('Changing rows per page to:', newRowsPerPage);
+    // console.log('Changing rows per page to:', newRowsPerPage);
     onChangeRowsPerPage(event);
     onResetPage();
   };
@@ -195,7 +204,7 @@ export default function TablePaginationWithApi() {
 
         {renderFiltersToolbar()}
 
-        <TableContainer sx={{ height: 520 }}>
+        <TableContainer sx={{ height: '100%' }}>
           <Table stickyHeader aria-label="sticky table">
             <TableHeadCustom headCells={TABLE_HEAD} />
 
@@ -218,27 +227,28 @@ export default function TablePaginationWithApi() {
                         <TableCell>{row.common_name}</TableCell>
                         <TableCell>{row.origin}</TableCell>
                         <TableCell>{row.size}</TableCell>
-                        <TableCell>{row.weight}</TableCell>
+                        <TableCell>
+                          {row.weight != null ? `${row.weight} ${row.weight_unit || ''}` : '-'}
+                        </TableCell>
                         <TableCell>{row.scientific_name}</TableCell>
-                        <TableCell>{row.type_of_package}</TableCell>
+                        <TableCell>{row.package_type}</TableCell>
                         <TableCell align="right">
                           <IconButton
                             aria-label="more"
-                            id="long-button"
-                            aria-controls={open ? 'long-menu' : undefined}
-                            aria-expanded={open ? 'true' : undefined}
+                            id={`long-button-${row.id}`}
+                            aria-controls={
+                              menuAnchor.rowId === row.id ? `long-menu-${row.id}` : undefined
+                            }
+                            aria-expanded={menuAnchor.rowId === row.id ? 'true' : undefined}
                             aria-haspopup="true"
-                            onClick={handleClick}
+                            onClick={(event) => handleClick(event, row)}
                           >
                             <Iconify icon="eva:more-vertical-fill" />
                           </IconButton>
                           <Menu
-                            id="long-menu"
-                            MenuListProps={{
-                              'aria-labelledby': 'long-button',
-                            }}
-                            anchorEl={anchorEl}
-                            open={open}
+                            id={`long-menu-${row.id}`}
+                            anchorEl={menuAnchor.anchorEl}
+                            open={isMenuOpen(row.id)}
                             onClose={handleClose}
                             slotProps={{
                               paper: {
@@ -257,7 +267,7 @@ export default function TablePaginationWithApi() {
                                 onClick={() => {
                                   if (option === 'Edit') {
                                     handleEditClick(row);
-                                    console.log('option', row);
+                                    // console.log('option', row);
                                   } else {
                                     handleClose();
                                   }

@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useSnackbar } from 'src/components/snackbar/snackbar-context';
+
 import CloseIcon from '@mui/icons-material/Close';
 import {
   Grid,
@@ -20,13 +20,14 @@ import {
   CircularProgress,
 } from '@mui/material';
 
+import { fetcher, endpoints } from 'src/lib/axios';
 import sizeList from 'src/assets/data/pfp/size-list';
 import originList from 'src/assets/data/pfp/origin-list';
 import commonNameList from 'src/assets/data/pfp/common-name-list';
-import typeOfPackageList from 'src/assets/data/pfp/type-of-package-list';
+import packageTypeList from 'src/assets/data/pfp/type-of-package-list';
 import scientificNameList from 'src/assets/data/pfp/scientific-name-list';
 
-import { fetcher, endpoints } from 'src/lib/axios';
+import { useSnackbar } from 'src/components/snackbar/snackbar-context';
 
 type Props = {
   endpoint: string;
@@ -41,24 +42,34 @@ export default function EditProduceItemDialog({ open, onClose, item, endpoint }:
 
   const [loading, setLoading] = useState(false);
   const {
-    control,
     handleSubmit,
     setValue,
+    trigger,
     formState: { errors },
     register,
     reset,
-
     watch,
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      item_no: '',
+      common_name: '',
+      weight: '',
+      weight_unit: '',
+      origin: '',
+      size: '',
+      package_type: '',
+      scientific_name: '',
+    },
+  });
 
   // Watch values for controlled Autocompletes
-  const watchFields = watch([
-    'common_name',
-    'origin',
-    'size',
-    'scientific_name',
-    'type_of_package',
-  ]);
+  const watchFields = watch(['common_name', 'origin', 'size', 'scientific_name', 'package_type']);
+
+  const weightValue = watch('weight');
+
+  useEffect(() => {
+    trigger('weight_unit');
+  }, [weightValue, trigger]);
 
   useEffect(() => {
     if (open && item) {
@@ -66,10 +77,10 @@ export default function EditProduceItemDialog({ open, onClose, item, endpoint }:
         item_no: item.item_no || '',
         common_name: item.common_name || '',
         weight: item.weight || '',
-        unit: item.unit || '',
+        weight_unit: item.weight_unit || null,
         origin: item.origin || '',
         size: item.size || '',
-        type_of_package: item.type_of_package || '',
+        package_type: item.package_type || '',
         scientific_name: item.scientific_name || '',
       });
     }
@@ -81,7 +92,7 @@ export default function EditProduceItemDialog({ open, onClose, item, endpoint }:
       fetcher([endpoints.produce.update, { method: 'PUT', data: payload }]),
     onSuccess: (data) => {
       // Update the cache with the new data
-      queryClient.setQueryData(['produceItems', endpoint], data);
+      queryClient.invalidateQueries({ queryKey: ['produceItems', endpoint] });
       setLoading(false);
       onClose();
       showSnackbar('Item updated successfully!', 'success');
@@ -90,7 +101,7 @@ export default function EditProduceItemDialog({ open, onClose, item, endpoint }:
       setLoading(false);
       console.error('Failed to update produce item:', error.response?.data || error.message);
       showSnackbar(
-        'Failed to create item: ' + (error.response?.data?.error || error.message),
+        'Failed to update item: ' + (error.response?.data?.error || error.message),
         'error'
       );
     },
@@ -99,20 +110,21 @@ export default function EditProduceItemDialog({ open, onClose, item, endpoint }:
   const onSubmit = async (data: any, event?: React.BaseSyntheticEvent) => {
     setLoading(true);
     try {
-      console.log(data);
+      // console.log(data);
       event?.preventDefault();
       const payload = {
-        id: item.id, // or whatever unique identifier you need to update
+        id: item.id,
         item_no: data.item_no,
         common_name: data.common_name,
-        weight: data.weight + ' ' + data.unit,
+        weight: data.weight === '' ? null : Number(data.weight),
+        weight_unit: data.weight_unit,
         origin: data.origin,
         size: data.size,
         scientific_name: data.scientific_name,
-        type_of_package: data.type_of_package,
+        package_type: data.package_type,
       };
 
-      await createMutation.mutateAsync(payload); // this calls your PUT API
+      createMutation.mutate(payload); // this calls your PUT API
       // await your API call or data processing
       onClose();
     } catch (error) {
@@ -157,8 +169,8 @@ export default function EditProduceItemDialog({ open, onClose, item, endpoint }:
             fullWidth
             variant="standard"
             {...register('item_no', { required: true })}
-            error={!!errors.item_no}
-            helperText={errors.item_no ? 'Item number is required' : ''}
+            error={!watch('item_no')?.trim()}
+            helperText={!watch('item_no')?.trim() ? 'Item number is required' : ''}
           />
 
           <Autocomplete
@@ -168,7 +180,14 @@ export default function EditProduceItemDialog({ open, onClose, item, endpoint }:
             value={commonNameList.find((opt) => opt.label === watchFields[0]) || null}
             onChange={(_, newValue) => setValue('common_name', newValue?.label || '')}
             renderInput={(params) => (
-              <TextField {...params} label="Common Name" variant="standard" required />
+              <TextField
+                {...params}
+                label="Common Name"
+                variant="standard"
+                required
+                error={!watch('common_name')?.trim()}
+                helperText={!watch('common_name')?.trim() ? 'Common name is required' : ''}
+              />
             )}
           />
 
@@ -202,15 +221,29 @@ export default function EditProduceItemDialog({ open, onClose, item, endpoint }:
               <FormControl variant="standard" fullWidth>
                 <InputLabel id="unit-label">Unit</InputLabel>
                 <Select
-                  labelId="unit-label"
-                  id="unit"
-                  {...register('unit')}
-                  value={watch('unit') || ''}
-                  onChange={(e) => setValue('unit', e.target.value)}
+                  labelId="weight-unit-label"
+                  id="weight-unit"
+                  {...register('weight_unit', {
+                    validate: (value) => {
+                      if (watch('weight') && !value) {
+                        return 'Unit is required when weight is entered';
+                      }
+                      return true;
+                    },
+                  })}
+                  value={watch('weight_unit') || ''}
+                  onChange={(e) => {
+                    setValue('weight_unit', e.target.value);
+                    trigger('weight_unit');
+                  }}
+                  error={!!errors.weight_unit}
                 >
                   <MenuItem value="kg">KG</MenuItem>
                   <MenuItem value="lbs">LBS</MenuItem>
                 </Select>
+                {errors.weight_unit && (
+                  <p style={{ color: 'red', fontSize: 12 }}>{errors.weight_unit.message}</p>
+                )}
               </FormControl>
             </Grid>
           </Grid>
@@ -237,9 +270,9 @@ export default function EditProduceItemDialog({ open, onClose, item, endpoint }:
           <Autocomplete
             sx={{ marginTop: 2 }}
             fullWidth
-            options={typeOfPackageList}
-            value={typeOfPackageList.find((opt) => opt.label === watchFields[4]) || null}
-            onChange={(_, newValue) => setValue('type_of_package', newValue?.label || '')}
+            options={packageTypeList}
+            value={packageTypeList.find((opt) => opt.label === watchFields[4]) || null}
+            onChange={(_, newValue) => setValue('package_type', newValue?.label || '')}
             renderInput={(params) => (
               <TextField {...params} label="Type of Package" variant="standard" />
             )}
