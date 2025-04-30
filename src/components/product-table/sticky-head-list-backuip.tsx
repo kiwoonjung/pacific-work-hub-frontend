@@ -9,7 +9,6 @@ import TableHead from '@mui/material/TableHead';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
-import CreateProduceItemButton from './create-produce-item-button';
 
 interface Column {
   id:
@@ -155,7 +154,7 @@ export default function StickyHeadTable() {
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <CreateProduceItemButton />
+      {/* <CreateProduceItemButton /> */}
       <TableContainer sx={{ height: 607 }}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>

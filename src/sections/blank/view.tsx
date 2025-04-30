@@ -37,7 +37,7 @@ export function BlankView({ title = 'Blank', sx, children }: Props) {
   );
 
   return (
-    <DashboardContent maxWidth="xl">
+    <DashboardContent maxWidth={false}>
       <Typography variant="h4"> {title} </Typography>
       {renderContent()}
     </DashboardContent>

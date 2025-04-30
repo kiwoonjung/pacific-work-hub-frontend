@@ -1,10 +1,10 @@
-import type { SelectChangeEvent } from '@mui/material/Select';
-
-import * as React from 'react';
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
 import {
-  Box,
   Grid,
   Button,
   Dialog,
@@ -12,73 +12,105 @@ import {
   MenuItem,
   TextField,
   InputLabel,
+  IconButton,
   DialogTitle,
   FormControl,
   Autocomplete,
   DialogContent,
   DialogActions,
+  CircularProgress,
 } from '@mui/material';
 
-import api from 'src/utils/axios';
-
+import { fetcher, endpoints } from 'src/lib/axios';
 import sizeList from 'src/assets/data/pfp/size-list';
 import originList from 'src/assets/data/pfp/origin-list';
 import commonNameList from 'src/assets/data/pfp/common-name-list';
-import typeOfPackage from 'src/assets/data/pfp/type-of-package-list';
+import packageTypeList from 'src/assets/data/pfp/type-of-package-list';
 import scientificNameList from 'src/assets/data/pfp/scientific-name-list';
 
-export default function CreateProduceItemButton() {
-  const [open, setOpen] = React.useState(false);
+import { useSnackbar } from 'src/components/snackbar/snackbar-context';
 
-  const [itemNo, setItemNo] = React.useState('');
-  const [commonName, setCommonName] = React.useState('');
-  const [weight, setWeight] = React.useState('');
-  const [unit, setUnit] = React.useState('');
-  const [origin, setOrigin] = React.useState('');
-  const [size, setSize] = React.useState('');
-  const [packageType, setPackageType] = React.useState('');
-  const [scientificName, setScientificName] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
+type Props = {
+  endpoint: string;
+};
 
-  const handleClickOpen = () => setOpen(true);
+export default function CreateProduceItemButton({ endpoint }: Props) {
+  const [open, setOpen] = useState(false);
+  const { showSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
+  const [loading, setLoading] = useState(false);
+
+  const {
+    handleSubmit,
+    register,
+    setValue,
+    trigger,
+    formState: { errors },
+    watch,
+    reset,
+  } = useForm({
+    defaultValues: {
+      item_no: '',
+      common_name: '',
+      weight: '',
+      weight_unit: '',
+      origin: '',
+      size: '',
+      package_type: '',
+      scientific_name: '',
+    },
+  });
+
+  const weightValue = watch('weight');
+
+  useEffect(() => {
+    trigger('weight_unit');
+  }, [weightValue, trigger]);
+
+  const createMutation = useMutation({
+    mutationFn: (payload: any) =>
+      fetcher([endpoints.produce.create, { method: 'POST', data: payload }]),
+    onSuccess: (data) => {
+      // Update the cache with the new data
+      queryClient.setQueryData(['produceItems', endpoint], data);
+      setLoading(false);
+      showSnackbar('Item created successfully!', 'success');
+      handleClose();
+    },
+    onError: (error: any) => {
+      setLoading(false);
+      console.error('Failed to create produce item:', error.response?.data || error.message);
+      showSnackbar(
+        'Failed to create item: ' + (error.response?.data?.error || error.message),
+        'error'
+      );
+    },
+  });
+
+  const handleClickOpen = () => {
+    reset();
+    setOpen(true);
+  };
   const handleClose = () => {
     setOpen(false);
-    setItemNo('');
-    setCommonName('');
-    setWeight('');
-    setUnit('');
-    setOrigin('');
-    setSize('');
-    setPackageType('');
-    setScientificName('');
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setLoading(true);
+  const onSubmit = (data: any) => {
     const payload = {
-      item_no: itemNo,
-      common_name: commonName,
-      origin,
-      size,
-      weight: weight + ' ' + unit,
-      scientific_name: scientificName,
-      package_type: packageType,
+      item_no: data.item_no,
+      common_name: data.common_name,
+      origin: data.origin,
+      size: data.size,
+      weight: data.weight === '' ? null : Number(data.weight),
+      weight_unit: data.weight_unit,
+      scientific_name: data.scientific_name,
+      package_type: data.package_type,
     };
-
-    try {
-      const response = await api.post('/pfp/produce/create-produce-itemsss', payload);
-      console.log('Created item:', response.data);
-      setLoading(false);
-      handleClose();
-    } catch (err: any) {
-      setLoading(false);
-      console.error('Failed to create produce item:', err.response?.data || err.message);
-    }
+    createMutation.mutate(payload);
   };
 
   return (
-    <React.Fragment>
+    <>
       <Button
         variant="contained"
         startIcon={<AddIcon />}
@@ -101,31 +133,49 @@ export default function CreateProduceItemButton() {
         }}
         fullWidth
       >
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <DialogTitle>Create New Produce Item</DialogTitle>
+          <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={(theme) => ({
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: theme.palette.grey[500],
+            })}
+          >
+            <CloseIcon />
+          </IconButton>
           <DialogContent>
             <TextField
               autoFocus
               required
               margin="dense"
               id="item_no"
-              name="item_no"
               label="Item No"
               fullWidth
               variant="standard"
-              value={itemNo}
-              onChange={(e) => setItemNo(e.target.value)}
+              {...register('item_no', { required: 'Item number is required' })}
+              error={!watch('item_no')?.trim()}
+              helperText={!watch('item_no')?.trim() ? 'Item number is required' : ''}
             />
 
             <Autocomplete
               sx={{ marginTop: 2 }}
               fullWidth
               options={commonNameList}
-              value={commonName ? { label: commonName } : null}
-              onChange={(_, newValue) => setCommonName(newValue?.label || '')}
-              isOptionEqualToValue={(option, value) => option.label === value.label}
+              value={commonNameList.find((opt) => opt.label === watch('common_name')) || null}
+              onChange={(_, newValue) => setValue('common_name', newValue?.label || '')}
               renderInput={(params) => (
-                <TextField {...params} label="Common Name" variant="standard" />
+                <TextField
+                  {...params}
+                  label="Common Name"
+                  variant="standard"
+                  required
+                  error={!watch('common_name')?.trim()}
+                  helperText={!watch('common_name')?.trim() ? 'Common name is required' : ''}
+                />
               )}
             />
 
@@ -134,9 +184,8 @@ export default function CreateProduceItemButton() {
                 <Autocomplete
                   fullWidth
                   options={originList}
-                  value={origin ? { label: origin } : null}
-                  onChange={(_, newValue) => setOrigin(newValue?.label || '')}
-                  isOptionEqualToValue={(option, value) => option.label === value.label}
+                  value={originList.find((opt) => opt.label === watch('origin')) || null}
+                  onChange={(_, newValue) => setValue('origin', newValue?.label || '')}
                   renderInput={(params) => (
                     <TextField {...params} label="Origin" variant="standard" />
                   )}
@@ -147,27 +196,42 @@ export default function CreateProduceItemButton() {
                 <TextField
                   margin="dense"
                   id="weight"
-                  name="weight"
                   label="Weight"
                   variant="standard"
                   fullWidth
-                  value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
+                  {...register('weight')}
+                  sx={{ marginBottom: 1 }}
+                  type="number"
                 />
               </Grid>
 
               <Grid size={{ xs: 3 }}>
                 <FormControl variant="standard" fullWidth>
-                  <InputLabel id="unit-label">Unit</InputLabel>
+                  <InputLabel id="weight-unit-label">Unit</InputLabel>
                   <Select
-                    labelId="unit-label"
-                    id="unit"
-                    value={unit}
-                    onChange={(e: SelectChangeEvent) => setUnit(e.target.value)}
+                    labelId="weight-unit-label"
+                    id="weight-unit"
+                    {...register('weight_unit', {
+                      validate: (value) => {
+                        if (watch('weight') && !value) {
+                          return 'Unit is required when weight is entered';
+                        }
+                        return true;
+                      },
+                    })}
+                    value={watch('weight_unit') || ''}
+                    onChange={(e) => {
+                      setValue('weight_unit', e.target.value);
+                      trigger('weight_unit');
+                    }}
+                    error={!!errors.weight_unit}
                   >
                     <MenuItem value="kg">KG</MenuItem>
                     <MenuItem value="lbs">LBS</MenuItem>
                   </Select>
+                  {errors.weight_unit && (
+                    <p style={{ color: 'red', fontSize: 12 }}>{errors.weight_unit.message}</p>
+                  )}
                 </FormControl>
               </Grid>
             </Grid>
@@ -176,51 +240,53 @@ export default function CreateProduceItemButton() {
               sx={{ marginTop: 2 }}
               fullWidth
               options={sizeList}
-              value={size ? { label: size } : null}
-              onChange={(_, newValue) => setSize(newValue?.label || '')}
+              value={sizeList.find((opt) => opt.label === watch('size')) || null}
+              onChange={(_, newValue) => setValue('size', newValue?.label || '')}
               isOptionEqualToValue={(option, value) => option.label === value.label}
               renderInput={(params) => <TextField {...params} label="Size" variant="standard" />}
             />
 
             <Autocomplete
               sx={{ marginTop: 2 }}
+              options={scientificNameList}
+              value={
+                scientificNameList.find((opt) => opt.label === watch('scientific_name')) || null
+              }
+              onChange={(_, newValue) => setValue('scientific_name', newValue?.label || '')}
+              isOptionEqualToValue={(option, value) => option.label === value.label}
+              renderInput={(params) => (
+                <TextField {...params} margin="dense" label="Scientific Name" variant="standard" />
+              )}
+            />
+
+            <Autocomplete
+              sx={{ marginTop: 2 }}
               fullWidth
-              options={typeOfPackage}
-              value={packageType ? { label: packageType } : null}
-              onChange={(_, newValue) => setPackageType(newValue?.label || '')}
+              options={packageTypeList}
+              value={packageTypeList.find((opt) => opt.label === watch('package_type')) || null}
+              onChange={(_, newValue) => setValue('package_type', newValue?.label || '')}
               isOptionEqualToValue={(option, value) => option.label === value.label}
               renderInput={(params) => (
                 <TextField {...params} label="Type of Package" variant="standard" />
               )}
             />
-
-            <Box sx={{ marginTop: 2 }}>
-              <Autocomplete
-                options={scientificNameList}
-                value={scientificName ? { label: scientificName } : null}
-                onChange={(_, newValue) => setScientificName(newValue?.label || '')}
-                isOptionEqualToValue={(option, value) => option.label === value.label}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    margin="dense"
-                    label="Scientific Name"
-                    variant="standard"
-                  />
-                )}
-              />
-            </Box>
           </DialogContent>
           <DialogActions>
             <Button variant="outlined" color="error" onClick={handleClose}>
               Cancel
             </Button>
-            <Button variant="contained" color="success" type="submit" loading={loading}>
-              Confirm
+            <Button
+              variant="contained"
+              color="success"
+              type="submit"
+              disabled={loading || !watch('item_no')?.trim() || !watch('common_name')?.trim()}
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+            >
+              {loading ? 'Creating...' : 'Confirm'}
             </Button>
           </DialogActions>
         </form>
       </Dialog>
-    </React.Fragment>
+    </>
   );
 }

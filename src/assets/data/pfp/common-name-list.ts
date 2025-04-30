@@ -15,7 +15,7 @@ const commonNameList = [
   { label: 'Gai Choy Miu' },
   { label: 'Gai Lan' },
   { label: "Ginger 'King'" },
-  { label: 'Gobo Root -Burdock' },
+  { label: 'Gobo Root - Burdock' },
   { label: 'Green Onion - Chinese Leek' },
   { label: 'Green Raddish' },
   { label: 'Green Taiwan Mango (Vietnam)' },

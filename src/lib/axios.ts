@@ -7,7 +7,7 @@ import { CONFIG } from 'src/global-config';
 // ----------------------------------------------------------------------
 
 const axiosInstance = axios.create({ baseURL: CONFIG.serverUrl });
-
+console.log('axiosInstance', axiosInstance);
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => Promise.reject((error.response && error.response.data) || 'Something went wrong!')
@@ -21,7 +21,19 @@ export const fetcher = async (args: string | [string, AxiosRequestConfig]) => {
   try {
     const [url, config] = Array.isArray(args) ? args : [args];
 
-    const res = await axiosInstance.get(url, { ...config });
+    // Check the HTTP method and use the appropriate Axios method
+    const method = config?.method?.toLowerCase() || 'get'; // Default to GET if no method is provided
+
+    let res;
+    if (method === 'post') {
+      res = await axiosInstance.post(url, config?.data, { ...config });
+    } else if (method === 'put') {
+      res = await axiosInstance.put(url, config?.data, { ...config });
+    } else if (method === 'delete') {
+      res = await axiosInstance.delete(url, { ...config });
+    } else {
+      res = await axiosInstance.get(url, { ...config });
+    }
 
     return res.data;
   } catch (error) {
@@ -56,5 +68,13 @@ export const endpoints = {
     list: '/api/product/list',
     details: '/api/product/details',
     search: '/api/product/search',
+  },
+
+  /////
+
+  produce: {
+    list: '/api/pfp/produce/get-produce-items',
+    create: '/api/pfp/produce/create-produce-item',
+    update: '/api/pfp/produce/update-produce-item',
   },
 };
