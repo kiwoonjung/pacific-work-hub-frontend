@@ -66,6 +66,7 @@ export default function TablePaginationWithApi() {
   const [searchQuery, setSearchQuery] = useState('');
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -74,9 +75,10 @@ export default function TablePaginationWithApi() {
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const handleEditClick = () => {
-    handleClose(); // closes the menu
+  const handleEditClick = (item: any) => {
+    setSelectedItem(item);
     setEditDialogOpen(true);
+    handleClose();
   };
 
   const defaultEndpoint = useMemo(() => getBaseEndpoint(page, rowsPerPage), [page, rowsPerPage]);
@@ -254,8 +256,8 @@ export default function TablePaginationWithApi() {
                                 selected={option === 'Pyxis'}
                                 onClick={() => {
                                   if (option === 'Edit') {
-                                    handleEditClick();
-                                    console.log('option', row.id);
+                                    handleEditClick(row);
+                                    console.log('option', row);
                                   } else {
                                     handleClose();
                                   }
@@ -288,7 +290,12 @@ export default function TablePaginationWithApi() {
           rowsPerPageOptions={[10, 25, 50]}
         />
       </Paper>
-      <EditProduceItemDialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} />
+      <EditProduceItemDialog
+        open={editDialogOpen}
+        endpoint={endpoint}
+        onClose={() => setEditDialogOpen(false)}
+        item={selectedItem}
+      />
     </>
   );
 }

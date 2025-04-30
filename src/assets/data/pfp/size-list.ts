@@ -49,7 +49,6 @@ const sizeList = [
   { label: '120 x 18.33g' },
   { label: '40 x 300g' },
   { label: '12 x 400g' },
-  { label: '30 x 400g' },
   { label: '50 x 200g' },
   { label: '40 x 400g' },
 ];

@@ -75,5 +75,6 @@ export const endpoints = {
   produce: {
     list: '/api/pfp/produce/get-produce-items',
     create: '/api/pfp/produce/create-produce-item',
+    update: '/api/pfp/produce/update-produce-item',
   },
 };
