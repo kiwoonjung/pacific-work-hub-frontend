@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import AddIcon from '@mui/icons-material/Add';
@@ -96,6 +96,8 @@ export default function CreateProduceItemButton({ endpoint }: Props) {
   };
 
   const onSubmit = (data: any) => {
+    setLoading(true);
+
     const payload = {
       item_no: data.item_no,
       common_name: data.common_name,
@@ -106,6 +108,7 @@ export default function CreateProduceItemButton({ endpoint }: Props) {
       scientific_name: data.scientific_name,
       package_type: data.package_type,
     };
+
     createMutation.mutate(payload);
   };
 
