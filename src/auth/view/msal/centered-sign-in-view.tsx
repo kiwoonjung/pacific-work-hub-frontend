@@ -39,20 +39,20 @@ export function CenteredSignInView() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const clearAuthState = async () => {
-    try {
-      // First, try to handle any pending redirects
-      await instance.handleRedirectPromise();
+  // const clearAuthState = async () => {
+  //   try {
+  //     // First, try to handle any pending redirects
+  //     await instance.handleRedirectPromise();
 
-      // Then clear the cache
-      await instance.clearCache();
+  //     // Then clear the cache
+  //     await instance.clearCache();
 
-      // Finally, logout using redirect
-      await instance.logoutRedirect();
-    } catch (error) {
-      console.error('Error clearing auth state:', error);
-    }
-  };
+  //     // Finally, logout using redirect
+  //     await instance.logoutRedirect();
+  //   } catch (error) {
+  //     console.error('Error clearing auth state:', error);
+  //   }
+  // };
 
   const handleLoginPopup = async () => {
     console.log('Starting popup login...');

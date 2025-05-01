@@ -29,6 +29,7 @@ import {
 
 import { TABLE_HEAD } from './pagination-with-api';
 import EditProduceItemDialog from './edit-produce-item-dialog';
+import DeleteConfirmDialog from './delete-item-confirm-dialog';
 import CreateProduceItemButton from './create-produce-item-button';
 
 import type { ApiResponse } from './pagination-with-api';
@@ -47,11 +48,9 @@ const createFilteredEndpoint = (
   return `${baseEndpoint}?page=${page + 1}&perPage=${rowsPerPage}${withSearch}${withCategory}`;
 };
 
-const getBaseEndpoint = (page = 1, rowsPerPage = 10) => {
+const getBaseEndpoint = (page = 1, rowsPerPage = 10) =>
   // console.log('Creating endpoint with:', { page, rowsPerPage });
-  return `${endpoints.produce.list}?page=${page + 1}&perPage=${rowsPerPage}`;
-};
-
+  `${endpoints.produce.list}?page=${page}&perPage=${rowsPerPage}`;
 const options = ['Edit', 'Delete'];
 const ITEM_HEIGHT = 48;
 
@@ -66,6 +65,7 @@ export default function TablePaginationWithApi() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
   const [menuAnchor, setMenuAnchor] = useState<{
@@ -80,14 +80,21 @@ export default function TablePaginationWithApi() {
     setSelectedItem(row);
   };
 
-  const handleClose = () => {
+  const handleMenuClose = () => {
     setMenuAnchor({ anchorEl: null, rowId: null });
   };
 
   const handleEditClick = (item: any) => {
     setSelectedItem(item);
     setEditDialogOpen(true);
-    handleClose();
+    handleMenuClose();
+  };
+
+  const handleDeleteClick = (item: any) => {
+    setSelectedItem(item);
+    setDeleteDialogOpen(true);
+    handleMenuClose();
+    // console.log(item);
   };
 
   const defaultEndpoint = useMemo(() => getBaseEndpoint(page, rowsPerPage), [page, rowsPerPage]);
@@ -112,7 +119,6 @@ export default function TablePaginationWithApi() {
   }, [page, rowsPerPage]);
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newRowsPerPage = parseInt(event.target.value, 10);
     // console.log('Changing rows per page to:', newRowsPerPage);
     onChangeRowsPerPage(event);
     onResetPage();
@@ -204,7 +210,7 @@ export default function TablePaginationWithApi() {
 
         {renderFiltersToolbar()}
 
-        <TableContainer sx={{ height: '100%' }}>
+        <TableContainer sx={{ height: 'calc(100vh - 400px)', overflowY: 'auto' }}>
           <Table stickyHeader aria-label="sticky table">
             <TableHeadCustom headCells={TABLE_HEAD} />
 
@@ -249,7 +255,7 @@ export default function TablePaginationWithApi() {
                             id={`long-menu-${row.id}`}
                             anchorEl={menuAnchor.anchorEl}
                             open={isMenuOpen(row.id)}
-                            onClose={handleClose}
+                            onClose={handleMenuClose}
                             slotProps={{
                               paper: {
                                 style: {
@@ -268,8 +274,10 @@ export default function TablePaginationWithApi() {
                                   if (option === 'Edit') {
                                     handleEditClick(row);
                                     // console.log('option', row);
+                                  } else if (option === 'Delete') {
+                                    handleDeleteClick(row);
                                   } else {
-                                    handleClose();
+                                    handleMenuClose();
                                   }
                                 }}
                                 sx={{
@@ -304,6 +312,12 @@ export default function TablePaginationWithApi() {
         open={editDialogOpen}
         endpoint={endpoint}
         onClose={() => setEditDialogOpen(false)}
+        item={selectedItem}
+      />
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        endpoint={endpoint}
+        onClose={() => setDeleteDialogOpen(false)}
         item={selectedItem}
       />
     </>
