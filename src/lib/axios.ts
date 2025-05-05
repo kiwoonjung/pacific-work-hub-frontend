@@ -78,4 +78,8 @@ export const endpoints = {
     update: '/api/pfp/produce/update-produce-item',
     delete: '/api/pfp/produce/delete-single-produce-item',
   },
+
+  user: {
+    create: '/api/user/create-user',
+  },
 };

@@ -286,7 +286,12 @@ export default function EditProduceItemDialog({ open, onClose, item, endpoint }:
               variant="contained"
               color="success"
               type="submit"
-              disabled={loading || !watch('item_no')?.trim() || !watch('common_name')?.trim()}
+              disabled={
+                loading ||
+                !watch('item_no')?.trim() ||
+                !watch('common_name')?.trim() ||
+                (!!watch('weight') && !watch('weight_unit'))
+              }
               startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
             >
               {loading ? 'Saving...' : 'Confirm'}

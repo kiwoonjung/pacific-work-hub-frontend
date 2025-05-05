@@ -6,6 +6,7 @@ import { AuthContext } from '../auth-context';
 
 import type { AuthState } from '../../types';
 
+import axiosInstance from 'src/lib/axios';
 // ----------------------------------------------------------------------
 
 type Props = {
@@ -60,6 +61,7 @@ export function MsalAuthProvider({ children }: Props) {
           }
 
           const userData = await userResponse.json();
+          console.log('userData', userData);
 
           // Try to fetch user's profile photo
           let photoURL = null;
@@ -78,21 +80,46 @@ export function MsalAuthProvider({ children }: Props) {
             console.warn('Unable to fetch profile photo:', err);
           }
 
-          const firstLetter = userData.displayName?.charAt(0).toUpperCase() || '?';
           const email = extractEmail(userData.mail || userData.userPrincipalName);
+          const fullName = `${userData.givenName} ${userData.surname}`;
+          const displayName = userData.givenName;
+          const azureId = userData.id; // Use this as the primary key in DB
+          const jobTitle = userData.jobTitle || null;
+          // Determine department based on email domain
+          let department = null;
+          if (email.endsWith('@pacificfirstaid.ca')) {
+            department = 'Pacific First Aid';
+          } else if (email.endsWith('@pacificfreshproduce.com')) {
+            department = 'Pacific Fresh Produce';
+          }
+
+          const userPayload = {
+            azure_id: azureId,
+            email,
+            full_name: fullName,
+            display_name: displayName,
+            photo_url: photoURL,
+            job_title: jobTitle,
+            department,
+            role: 'employee', // Default role (adjust as needed)
+          };
+
+          // 🔹 Send user data to the backend for update or insert
+          try {
+            await axiosInstance.post('/api/user/create-user', userPayload);
+          } catch (err) {
+            console.error('Failed to sync user with backend:', err);
+          }
 
           setState({
             user: {
-              id: account.homeAccountId,
+              id: azureId,
               email,
-              displayName: userData.displayName,
-              role: 'admin',
-              photoURL, // fetched photo blob URL
-              firstLetter,
-              jobTitle: userData.jobTitle || null,
-              department: userData.department || null,
-              companyName: userData.companyName || null,
-              officeLocation: userData.officeLocation || null,
+              fullName,
+              displayName,
+              photoURL,
+              jobTitle,
+              department,
             },
             loading: false,
           });

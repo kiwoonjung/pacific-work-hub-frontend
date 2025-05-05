@@ -69,7 +69,7 @@ export function CenteredSignInView() {
       if (accounts.length > 0) {
         console.log('Already authenticated with account:', accounts[0].username);
         instance.setActiveAccount(accounts[0]);
-        navigate(paths.dashboard.root);
+        // navigate(paths.dashboard.root);
         return;
       }
 
@@ -84,7 +84,7 @@ export function CenteredSignInView() {
       if (popupResponse) {
         console.log('Found popup response:', popupResponse);
         instance.setActiveAccount(popupResponse.account);
-        navigate(paths.dashboard.root);
+        // navigate(paths.dashboard.root);
         return;
       }
 
@@ -93,7 +93,7 @@ export function CenteredSignInView() {
 
       console.log('Login popup completed:', response);
       instance.setActiveAccount(response.account);
-      navigate(paths.dashboard.root);
+      // navigate(paths.dashboard.root);
     } catch (error) {
       console.error('Authentication error:', error);
       if (
@@ -108,7 +108,7 @@ export function CenteredSignInView() {
           const response = await instance.loginPopup(loginRequest);
           console.log('Retry login popup completed:', response);
           instance.setActiveAccount(response.account);
-          navigate(paths.dashboard.root);
+          // navigate(paths.dashboard.root);
         } catch (retryError) {
           console.error('Error during retry:', retryError);
         }

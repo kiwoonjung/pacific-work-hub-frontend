@@ -45,13 +45,21 @@ export const themeConfig: ThemeConfig = {
    * Palette
    *************************************** */
   palette: {
+    // primary: {
+    //   lighter: '#C8FAD6',
+    //   light: '#5BE49B',
+    //   main: '#00A76F',
+    //   dark: '#007867',
+    //   darker: '#004B50',
+    //   contrastText: '#FFFFFF',
+    // },
     primary: {
-      lighter: '#C8FAD6',
-      light: '#5BE49B',
-      main: '#00A76F',
-      dark: '#007867',
-      darker: '#004B50',
-      contrastText: '#FFFFFF',
+      lighter: '#D6E0FA', // Lightest tint of the blue
+      light: '#5B7BE4', // Light tint
+      main: '#0032A0', // Deep blue (your new main color)
+      dark: '#00277A', // Darker shade
+      darker: '#001B55', // Darkest shade
+      contrastText: '#FFFFFF', // White for contrast on dark blue
     },
     secondary: {
       lighter: '#EFD6FF',
