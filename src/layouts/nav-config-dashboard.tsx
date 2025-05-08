@@ -52,24 +52,24 @@ export const navData: NavSectionProps['data'] = [
   {
     subheader: 'Pacific First Aid',
     items: [
-      {
-        title: 'Admin',
-        path: paths.admin.root,
-        icon: ICONS.user,
-        info: <Label>{CONFIG.appVersion}</Label>,
-      },
-      { title: 'Program', path: paths.dashboard.two, icon: ICONS.ecommerce },
-      { title: 'Marketing', path: paths.dashboard.three, icon: ICONS.analytics },
-      {
-        title: 'Warehouse',
-        path: paths.dashboard.three,
-        icon: ICONS.analytics,
-        children: [
-          { title: 'AMCARE', path: paths.dashboard.group.root },
-          { title: 'Amazon', path: paths.dashboard.group.five },
-          { title: 'Shopify', path: paths.dashboard.group.six },
-        ],
-      },
+      // {
+      //   title: 'Admin',
+      //   path: paths.admin.root,
+      //   icon: ICONS.user,
+      //   info: <Label>{CONFIG.appVersion}</Label>,
+      // },
+      // { title: 'Program', path: paths.dashboard.two, icon: ICONS.ecommerce },
+      // { title: 'Marketing', path: paths.dashboard.three, icon: ICONS.analytics },
+      // {
+      //   title: 'Warehouse',
+      //   path: paths.dashboard.three,
+      //   icon: ICONS.analytics,
+      //   children: [
+      //     { title: 'AMCARE', path: paths.dashboard.group.root },
+      //     { title: 'Amazon', path: paths.dashboard.group.five },
+      //     { title: 'Shopify', path: paths.dashboard.group.six },
+      //   ],
+      // },
     ],
   },
 
@@ -84,24 +84,24 @@ export const navData: NavSectionProps['data'] = [
         path: paths.pfp.produceList,
         icon: ICONS.cart,
       },
-      {
-        title: 'Order',
-        path: paths.dashboard.two,
-        icon: ICONS.ecommerce,
-        children: [
-          { title: 'Recieved', path: paths.dashboard.two, icon: ICONS.ecommerce },
-          { title: 'Shipped', path: paths.dashboard.two, icon: ICONS.ecommerce },
-        ],
-      },
-      {
-        title: 'Contact',
-        path: paths.dashboard.two,
-        icon: ICONS.ecommerce,
-        children: [
-          { title: 'Cash Customer', path: paths.dashboard.two, icon: ICONS.ecommerce },
-          { title: 'PFP Client', path: paths.dashboard.two, icon: ICONS.ecommerce },
-        ],
-      },
+      // {
+      //   title: 'Order',
+      //   path: paths.dashboard.two,
+      //   icon: ICONS.ecommerce,
+      //   children: [
+      //     { title: 'Recieved', path: paths.dashboard.two, icon: ICONS.ecommerce },
+      //     { title: 'Shipped', path: paths.dashboard.two, icon: ICONS.ecommerce },
+      //   ],
+      // },
+      // {
+      //   title: 'Contact',
+      //   path: paths.dashboard.two,
+      //   icon: ICONS.ecommerce,
+      //   children: [
+      //     { title: 'Cash Customer', path: paths.dashboard.two, icon: ICONS.ecommerce },
+      //     { title: 'PFP Client', path: paths.dashboard.two, icon: ICONS.ecommerce },
+      //   ],
+      // },
     ],
   },
 ];

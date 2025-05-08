@@ -160,6 +160,7 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
           <Box
             sx={{
               pt: 8,
+              pb: 3,
               display: 'flex',
               alignItems: 'center',
               flexDirection: 'column',
@@ -168,7 +169,7 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
             {renderAvatar()}
 
             <Typography variant="subtitle1" noWrap sx={{ mt: 2 }}>
-              {user?.displayName}
+              {user?.fullName}
             </Typography>
 
             <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }} noWrap>
@@ -176,7 +177,7 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
             </Typography>
           </Box>
 
-          <Box
+          {/* <Box
             sx={{
               p: 3,
               gap: 1,
@@ -210,7 +211,7 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
                 <Iconify icon="mingcute:add-line" />
               </IconButton>
             </Tooltip>
-          </Box>
+          </Box> */}
 
           {renderList()}
 
