@@ -61,6 +61,8 @@ export default function TablePaginationWithApi() {
     defaultRowsPerPage: 10,
   });
 
+  const table = useTable({ defaultOrderBy: 'orderNumber' });
+
   const [category, setCategory] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -147,7 +149,7 @@ export default function TablePaginationWithApi() {
   }, [defaultEndpoint, onResetPage]);
 
   const renderFiltersToolbar = () => (
-    <Box sx={{ px: 3, gap: 1, mb: 3, mt: 3, display: 'flex', alignItems: 'center' }}>
+    <Box sx={{ px: 3, gap: 1, mb: 3, pt: 3, display: 'flex', alignItems: 'center' }}>
       <TextField
         fullWidth
         value={searchQuery}
@@ -204,14 +206,19 @@ export default function TablePaginationWithApi() {
 
   return (
     <>
-      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+      <Paper>
         <CreateProduceItemButton endpoint={endpoint} />
         {/* <DataInfo totalItems={data?.totalItems ?? 0} totalPages={data?.totalPages ?? 0} /> */}
 
         {renderFiltersToolbar()}
 
-        <TableContainer sx={{ height: 'calc(100vh - 400px)', overflowY: 'auto' }}>
-          <Table stickyHeader aria-label="sticky table">
+        <TableContainer>
+          <Table
+            stickyHeader
+            aria-label="sticky table"
+            size={table.dense ? 'small' : 'medium'}
+            sx={{ minWidth: 960 }}
+          >
             <TableHeadCustom headCells={TABLE_HEAD} />
 
             <TableBody>
@@ -300,6 +307,7 @@ export default function TablePaginationWithApi() {
         <Divider />
 
         <TablePaginationCustom
+          dense={table.dense}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={onChangePage}

@@ -2,11 +2,11 @@ import { useMemo, useEffect } from 'react';
 import { useMsal } from '@azure/msal-react';
 import { useSetState } from 'minimal-shared/hooks';
 
+import axiosInstance from 'src/lib/axios';
+
 import { AuthContext } from '../auth-context';
 
 import type { AuthState } from '../../types';
-
-import axiosInstance from 'src/lib/axios';
 // ----------------------------------------------------------------------
 
 type Props = {
