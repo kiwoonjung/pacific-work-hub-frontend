@@ -1,9 +1,12 @@
 import type { ButtonProps } from '@mui/material/Button';
 
-import { useCallback } from 'react';
+import { useNavigate } from 'react-router';
+import { useMsal } from '@azure/msal-react';
+import { useState, useCallback } from 'react';
 
 import Button from '@mui/material/Button';
 
+import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 
 import { useAuthContext } from 'src/auth/hooks';
@@ -16,6 +19,10 @@ type Props = ButtonProps & {
 };
 
 export function SignOutButton({ onClose, sx, ...other }: Props) {
+  const { instance } = useMsal();
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
   const router = useRouter();
 
   const { checkUserSession } = useAuthContext();
@@ -32,13 +39,27 @@ export function SignOutButton({ onClose, sx, ...other }: Props) {
     }
   }, [checkUserSession, onClose, router]);
 
+  const handleLogoutPopup = async () => {
+    try {
+      setIsLoading(true);
+      // console.log('logout!');
+      await instance.logoutPopup();
+      // navigate(paths.auth.msal.signIn);
+    } catch (error) {
+      console.log('Logout error:', error);
+      navigate(paths.auth.msal.signIn);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Button
       fullWidth
       variant="soft"
       size="large"
       color="error"
-      onClick={handleLogout}
+      onClick={handleLogoutPopup}
       sx={sx}
       {...other}
     >

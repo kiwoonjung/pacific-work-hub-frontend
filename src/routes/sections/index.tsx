@@ -5,7 +5,9 @@ import { Navigate } from 'react-router';
 
 import { CONFIG } from 'src/global-config';
 
+import { pfpRoutes } from './pfp';
 import { authRoutes } from './auth';
+import { adminRoutes } from './admin';
 import { dashboardRoutes } from './dashboard';
 
 // ----------------------------------------------------------------------
@@ -20,6 +22,12 @@ export const routesSection: RouteObject[] = [
 
   // Auth
   ...authRoutes,
+
+  // Admin
+  ...adminRoutes,
+
+  // PFP
+  ...pfpRoutes,
 
   // Dashboard
   ...dashboardRoutes,

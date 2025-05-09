@@ -6,21 +6,15 @@ import type { WorkspacesPopoverProps } from './components/workspaces-popover';
 
 export const _workspaces: WorkspacesPopoverProps['data'] = [
   {
-    id: 'team-1',
-    name: 'Team 1',
+    id: 'pfp',
+    name: 'Pacific Fresh Produce',
     plan: 'Free',
-    logo: `${CONFIG.assetsDir}/assets/icons/workspaces/logo-1.webp`,
+    logo: `${CONFIG.assetsDir}/assets/icons/workspaces/pfp.png`,
   },
   {
     id: 'team-2',
     name: 'Team 2',
     plan: 'Pro',
     logo: `${CONFIG.assetsDir}/assets/icons/workspaces/logo-2.webp`,
-  },
-  {
-    id: 'team-3',
-    name: 'Team 3',
-    plan: 'Pro',
-    logo: `${CONFIG.assetsDir}/assets/icons/workspaces/logo-3.webp`,
   },
 ];

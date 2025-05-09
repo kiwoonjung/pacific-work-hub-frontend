@@ -40,6 +40,7 @@ const ICONS = {
   analytics: icon('ic-analytics'),
   dashboard: icon('ic-dashboard'),
   parameter: icon('ic-parameter'),
+  cart: icon('ic-cart'),
 };
 
 // ----------------------------------------------------------------------
@@ -49,34 +50,77 @@ export const navData: NavSectionProps['data'] = [
    * Overview
    */
   {
-    subheader: 'Overview',
+    subheader: 'Pacific First Aid',
     items: [
-      {
-        title: 'One',
-        path: paths.dashboard.root,
-        icon: ICONS.dashboard,
-        info: <Label>v{CONFIG.appVersion}</Label>,
-      },
-      { title: 'Two', path: paths.dashboard.two, icon: ICONS.ecommerce },
-      { title: 'Three', path: paths.dashboard.three, icon: ICONS.analytics },
+      // {
+      //   title: 'Admin',
+      //   path: paths.admin.root,
+      //   icon: ICONS.user,
+      //   info: <Label>{CONFIG.appVersion}</Label>,
+      // },
+      // { title: 'Program', path: paths.dashboard.two, icon: ICONS.ecommerce },
+      // { title: 'Marketing', path: paths.dashboard.three, icon: ICONS.analytics },
+      // {
+      //   title: 'Warehouse',
+      //   path: paths.dashboard.three,
+      //   icon: ICONS.analytics,
+      //   children: [
+      //     { title: 'AMCARE', path: paths.dashboard.group.root },
+      //     { title: 'Amazon', path: paths.dashboard.group.five },
+      //     { title: 'Shopify', path: paths.dashboard.group.six },
+      //   ],
+      // },
     ],
   },
+
   /**
-   * Management
+   * Pacific Fresh Produce
    */
   {
-    subheader: 'Management',
+    subheader: 'Pacific Fresh Produce',
     items: [
       {
-        title: 'Group',
-        path: paths.dashboard.group.root,
-        icon: ICONS.user,
-        children: [
-          { title: 'Four', path: paths.dashboard.group.root },
-          { title: 'Five', path: paths.dashboard.group.five },
-          { title: 'Six', path: paths.dashboard.group.six },
-        ],
+        title: 'Produce List',
+        path: paths.pfp.produceList,
+        icon: ICONS.cart,
       },
+      // {
+      //   title: 'Order',
+      //   path: paths.dashboard.two,
+      //   icon: ICONS.ecommerce,
+      //   children: [
+      //     { title: 'Recieved', path: paths.dashboard.two, icon: ICONS.ecommerce },
+      //     { title: 'Shipped', path: paths.dashboard.two, icon: ICONS.ecommerce },
+      //   ],
+      // },
+      // {
+      //   title: 'Contact',
+      //   path: paths.dashboard.two,
+      //   icon: ICONS.ecommerce,
+      //   children: [
+      //     { title: 'Cash Customer', path: paths.dashboard.two, icon: ICONS.ecommerce },
+      //     { title: 'PFP Client', path: paths.dashboard.two, icon: ICONS.ecommerce },
+      //   ],
+      // },
     ],
   },
 ];
+
+/**
+ * Management
+ */
+// {
+//   subheader: 'Pacific Fresh Produce',
+//   items: [
+//     {
+//       title: 'Inventory',
+//       path: paths.dashboard.group.root,
+//       icon: ICONS.user,
+//       children: [
+//         { title: 'Four', path: paths.dashboard.group.root },
+//         { title: 'Five', path: paths.dashboard.group.five },
+//         { title: 'Six', path: paths.dashboard.group.six },
+//       ],
+//     },
+//   ],
+// },

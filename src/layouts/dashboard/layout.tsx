@@ -14,7 +14,7 @@ import { _contacts, _notifications } from 'src/_mock';
 import { Logo } from 'src/components/logo';
 import { useSettingsContext } from 'src/components/settings';
 
-import { useMockedUser } from 'src/auth/hooks';
+import { useAuthContext } from 'src/auth/hooks';
 
 import { NavMobile } from './nav-mobile';
 import { VerticalDivider } from './content';
@@ -30,7 +30,6 @@ import { HeaderSection } from '../core/header-section';
 import { LayoutSection } from '../core/layout-section';
 import { AccountDrawer } from '../components/account-drawer';
 import { SettingsButton } from '../components/settings-button';
-import { LanguagePopover } from '../components/language-popover';
 import { ContactsPopover } from '../components/contacts-popover';
 import { WorkspacesPopover } from '../components/workspaces-popover';
 import { navData as dashboardNavData } from '../nav-config-dashboard';
@@ -64,9 +63,7 @@ export function DashboardLayout({
   layoutQuery = 'lg',
 }: DashboardLayoutProps) {
   const theme = useTheme();
-
-  const { user } = useMockedUser();
-
+  const { user } = useAuthContext();
   const settings = useSettingsContext();
 
   const navVars = dashboardNavColorVars(theme, settings.state.navColor, settings.state.navLayout);
@@ -154,7 +151,7 @@ export function DashboardLayout({
           <Searchbar data={navData} />
 
           {/** @slot Language popover */}
-          <LanguagePopover
+          {/* <LanguagePopover
             data={[
               { value: 'en', label: 'English', countryCode: 'GB' },
               { value: 'fr', label: 'French', countryCode: 'FR' },
@@ -162,7 +159,7 @@ export function DashboardLayout({
               { value: 'cn', label: 'Chinese', countryCode: 'CN' },
               { value: 'ar', label: 'Arabic', countryCode: 'SA' },
             ]}
-          />
+          /> */}
 
           {/** @slot Notifications popover */}
           <NotificationsDrawer data={_notifications} />

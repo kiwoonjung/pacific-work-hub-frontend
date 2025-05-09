@@ -69,6 +69,7 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
     <ButtonBase
       disableRipple
       onClick={onOpen}
+      disabled
       sx={[
         {
           py: 0.5,
@@ -93,7 +94,7 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
         {workspace?.name}
       </Box>
 
-      <Label
+      {/* <Label
         color={workspace?.plan === 'Free' ? 'default' : 'info'}
         sx={{
           height: 22,
@@ -102,9 +103,9 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
         }}
       >
         {workspace?.plan}
-      </Label>
+      </Label> */}
 
-      <Iconify width={16} icon="carbon:chevron-sort" sx={{ color: 'text.disabled' }} />
+      {/* <Iconify width={16} icon="carbon:chevron-sort" sx={{ color: 'text.disabled' }} /> */}
     </ButtonBase>
   );
 
@@ -126,6 +127,7 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
               selected={option.id === workspace?.id}
               onClick={() => handleChangeWorkspace(option)}
               sx={{ height: 48 }}
+              disabled
             >
               <Avatar alt={option.name} src={option.logo} sx={{ width: 24, height: 24 }} />
 
@@ -174,7 +176,7 @@ export function WorkspacesPopover({ data = [], sx, ...other }: WorkspacesPopover
   return (
     <>
       {renderButton()}
-      {renderMenuList()}
+      {/* {renderMenuList()} */}
     </>
   );
 }

@@ -8,18 +8,14 @@ import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 
-import { paths } from 'src/routes/paths';
-
 import { CONFIG } from 'src/global-config';
 
-import { Label } from 'src/components/label';
-
-import { useMockedUser } from 'src/auth/hooks';
+import { useAuthContext } from 'src/auth/hooks';
 
 // ----------------------------------------------------------------------
 
 export function NavUpgrade({ sx, ...other }: BoxProps) {
-  const { user } = useMockedUser();
+  const { user } = useAuthContext();
 
   return (
     <Box
@@ -28,11 +24,22 @@ export function NavUpgrade({ sx, ...other }: BoxProps) {
     >
       <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
         <Box sx={{ position: 'relative' }}>
-          <Avatar src={user?.photoURL} alt={user?.displayName} sx={{ width: 48, height: 48 }}>
+          <Avatar
+            src={user?.photoURL || undefined}
+            alt={user?.displayName}
+            sx={{
+              width: 48,
+              height: 48,
+              ...(!user?.photoURL && {
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
+              }),
+            }}
+          >
             {user?.displayName?.charAt(0).toUpperCase()}
           </Avatar>
 
-          <Label
+          {/* <Label
             color="success"
             variant="filled"
             sx={{
@@ -45,7 +52,7 @@ export function NavUpgrade({ sx, ...other }: BoxProps) {
             }}
           >
             Free
-          </Label>
+          </Label> */}
         </Box>
 
         <Box sx={{ mb: 2, mt: 1.5, width: 1 }}>
@@ -54,7 +61,7 @@ export function NavUpgrade({ sx, ...other }: BoxProps) {
             noWrap
             sx={{ mb: 1, color: 'var(--layout-nav-text-primary-color)' }}
           >
-            {user?.displayName}
+            {user?.fullName}
           </Typography>
 
           <Typography
@@ -66,9 +73,9 @@ export function NavUpgrade({ sx, ...other }: BoxProps) {
           </Typography>
         </Box>
 
-        <Button variant="contained" href={paths.minimalStore} target="_blank" rel="noopener">
+        {/* <Button variant="contained" href={paths.minimalStore} target="_blank" rel="noopener">
           Upgrade to Pro
-        </Button>
+        </Button> */}
       </Box>
     </Box>
   );

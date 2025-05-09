@@ -1,24 +1,21 @@
 import { z as zod } from 'zod';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useBoolean } from 'minimal-shared/hooks';
+import { useNavigate } from 'react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMsal, AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react';
 
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import InputAdornment from '@mui/material/InputAdornment';
 
 import { paths } from 'src/routes/paths';
-import { RouterLink } from 'src/routes/components';
 
-import { Iconify } from 'src/components/iconify';
-import { Form, Field } from 'src/components/hook-form';
+import { loginRequest } from 'src/authConfig';
+
+import { Form } from 'src/components/hook-form';
 import { AnimateLogoRotate } from 'src/components/animate';
 
 import { FormHead } from 'src/auth/components/form-head';
-// import { FormSocials } from '../../../components/form-socials';
-// import { FormDivider } from '../../../components/form-divider';
 
 // ----------------------------------------------------------------------
 
@@ -38,7 +35,103 @@ export const SignInSchema = zod.object({
 // ----------------------------------------------------------------------
 
 export function CenteredSignInView() {
-  const showPassword = useBoolean();
+  const { instance } = useMsal();
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  // const clearAuthState = async () => {
+  //   try {
+  //     // First, try to handle any pending redirects
+  //     await instance.handleRedirectPromise();
+
+  //     // Then clear the cache
+  //     await instance.clearCache();
+
+  //     // Finally, logout using redirect
+  //     await instance.logoutRedirect();
+  //   } catch (error) {
+  //     console.error('Error clearing auth state:', error);
+  //   }
+  // };
+
+  const handleLoginPopup = async () => {
+    console.log('Starting popup login...');
+    if (isLoading) {
+      console.log('Login already in progress, returning...');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      // Check if we're already authenticated
+      const accounts = instance.getAllAccounts();
+      if (accounts.length > 0) {
+        console.log('Already authenticated with account:', accounts[0].username);
+        instance.setActiveAccount(accounts[0]);
+        // navigate(paths.dashboard.root);
+        return;
+      }
+
+      console.log('No active accounts, proceeding with login...');
+
+      // Clear any existing state
+      await instance.clearCache();
+      console.log('Cache cleared');
+
+      // Handle any pending popups first
+      const popupResponse = await instance.handleRedirectPromise();
+      if (popupResponse) {
+        console.log('Found popup response:', popupResponse);
+        instance.setActiveAccount(popupResponse.account);
+        // navigate(paths.dashboard.root);
+        return;
+      }
+
+      console.log('Starting popup login...');
+      const response = await instance.loginPopup(loginRequest);
+
+      console.log('Login popup completed:', response);
+      instance.setActiveAccount(response.account);
+      // navigate(paths.dashboard.root);
+    } catch (error) {
+      console.error('Authentication error:', error);
+      if (
+        error instanceof Error &&
+        error.name === 'BrowserAuthError' &&
+        error.message.includes('interaction_in_progress')
+      ) {
+        console.log('Found existing interaction, attempting to clear it...');
+        try {
+          await instance.clearCache();
+          console.log('Cache cleared for retry');
+          const response = await instance.loginPopup(loginRequest);
+          console.log('Retry login popup completed:', response);
+          instance.setActiveAccount(response.account);
+          // navigate(paths.dashboard.root);
+        } catch (retryError) {
+          console.error('Error during retry:', retryError);
+        }
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogoutPopup = async () => {
+    try {
+      setIsLoading(true);
+      await instance.logoutPopup();
+      // After successful logout, navigate to the login page
+      navigate(paths.auth.msal.signIn);
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if there's an error, try to navigate back to login
+      navigate(paths.auth.msal.signIn);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const defaultValues: SignInSchemaType = {
     email: '',
@@ -66,52 +159,36 @@ export function CenteredSignInView() {
 
   const renderForm = () => (
     <Box sx={{ gap: 3, display: 'flex', flexDirection: 'column' }}>
-      <Field.Text name="email" label="Email address" slotProps={{ inputLabel: { shrink: true } }} />
-
-      <Box sx={{ gap: 1.5, display: 'flex', flexDirection: 'column' }}>
-        {/* <Link
-          component={RouterLink}
-          href={paths.authDemo.centered.resetPassword}
-          variant="body2"
+      <AuthenticatedTemplate>
+        <Button
+          fullWidth
           color="inherit"
-          sx={{ alignSelf: 'flex-end' }}
+          size="large"
+          type="submit"
+          variant="contained"
+          loading={isSubmitting}
+          loadingIndicator="Sign out..."
+          onClick={handleLogoutPopup}
         >
-          Forgot password?
-        </Link> */}
+          Sign out
+        </Button>
+      </AuthenticatedTemplate>
 
-        <Field.Text
-          name="password"
-          label="Password"
-          placeholder="6+ characters"
-          type={showPassword.value ? 'text' : 'password'}
-          slotProps={{
-            inputLabel: { shrink: true },
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={showPassword.onToggle} edge="end">
-                    <Iconify
-                      icon={showPassword.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
-                    />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
-        />
-      </Box>
-
-      <Button
-        fullWidth
-        color="inherit"
-        size="large"
-        type="submit"
-        variant="contained"
-        loading={isSubmitting}
-        loadingIndicator="Sign in..."
-      >
-        Sign in
-      </Button>
+      <UnauthenticatedTemplate>
+        <Button
+          fullWidth
+          color="inherit"
+          size="large"
+          type="submit"
+          variant="contained"
+          loading={isLoading}
+          loadingIndicator="Sign in..."
+          onClick={handleLoginPopup}
+          disabled={isLoading}
+        >
+          Sign in
+        </Button>
+      </UnauthenticatedTemplate>
     </Box>
   );
 
@@ -119,29 +196,11 @@ export function CenteredSignInView() {
     <>
       <AnimateLogoRotate sx={{ mb: 3, mx: 'auto' }} />
 
-      <FormHead
-        title="Sign in to your account"
-        // description={
-        //   <>
-        //     {`Don’t have an account? `}
-        //     <Link component={RouterLink} href={paths.authDemo.centered.signUp} variant="subtitle2">
-        //       Get started
-        //     </Link>
-        //   </>
-        // }
-      />
+      <FormHead title="Sign in to your account" />
 
       <Form methods={methods} onSubmit={onSubmit}>
         {renderForm()}
       </Form>
-
-      {/* <FormDivider />
-
-      <FormSocials
-        signInWithGoogle={() => {}}
-        singInWithGithub={() => {}}
-        signInWithTwitter={() => {}}
-      /> */}
     </>
   );
 }

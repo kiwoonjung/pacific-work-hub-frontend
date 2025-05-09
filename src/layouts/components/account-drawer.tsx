@@ -24,9 +24,8 @@ import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 import { AnimateBorder } from 'src/components/animate';
 
-import { useMockedUser } from 'src/auth/hooks';
+import { useAuthContext } from 'src/auth/hooks';
 
-import { UpgradeBlock } from './nav-upgrade';
 import { AccountButton } from './account-button';
 import { SignOutButton } from './sign-out-button';
 
@@ -43,9 +42,7 @@ export type AccountDrawerProps = IconButtonProps & {
 
 export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
   const pathname = usePathname();
-
-  const { user } = useMockedUser();
-
+  const { user } = useAuthContext();
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
 
   const renderAvatar = () => (
@@ -55,7 +52,19 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
         primaryBorder: { size: 120, sx: { color: 'primary.main' } },
       }}
     >
-      <Avatar src={user?.photoURL} alt={user?.displayName} sx={{ width: 1, height: 1 }}>
+      <Avatar
+        src={user?.photoURL || undefined}
+        alt={user?.displayName}
+        sx={{
+          width: 1,
+          height: 1,
+          ...(!user?.photoURL && {
+            bgcolor: 'primary.main',
+            color: 'primary.contrastText',
+            fontSize: '2.5rem',
+          }),
+        }}
+      >
         {user?.displayName?.charAt(0).toUpperCase()}
       </Avatar>
     </AnimateBorder>
@@ -150,6 +159,7 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
           <Box
             sx={{
               pt: 8,
+              pb: 3,
               display: 'flex',
               alignItems: 'center',
               flexDirection: 'column',
@@ -158,7 +168,7 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
             {renderAvatar()}
 
             <Typography variant="subtitle1" noWrap sx={{ mt: 2 }}>
-              {user?.displayName}
+              {user?.fullName}
             </Typography>
 
             <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }} noWrap>
@@ -166,7 +176,7 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
             </Typography>
           </Box>
 
-          <Box
+          {/* <Box
             sx={{
               p: 3,
               gap: 1,
@@ -200,13 +210,11 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
                 <Iconify icon="mingcute:add-line" />
               </IconButton>
             </Tooltip>
-          </Box>
+          </Box> */}
 
           {renderList()}
 
-          <Box sx={{ px: 2.5, py: 3 }}>
-            <UpgradeBlock />
-          </Box>
+          <Box sx={{ px: 2.5, py: 3 }}>{/* <UpgradeBlock /> */}</Box>
         </Scrollbar>
 
         <Box sx={{ p: 2.5 }}>
