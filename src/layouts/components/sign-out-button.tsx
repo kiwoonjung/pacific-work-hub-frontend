@@ -42,7 +42,7 @@ export function SignOutButton({ onClose, sx, ...other }: Props) {
   const handleLogoutPopup = async () => {
     try {
       setIsLoading(true);
-      console.log('logout!');
+      // console.log('logout!');
       await instance.logoutPopup();
       // navigate(paths.auth.msal.signIn);
     } catch (error) {

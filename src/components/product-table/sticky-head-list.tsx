@@ -45,7 +45,7 @@ const createFilteredEndpoint = (
 ) => {
   const withSearch = searchQuery ? `&search=${searchQuery.trim()}` : '';
   const withCategory = category ? `&category=${category}` : '';
-  return `${baseEndpoint}?page=${page + 1}&perPage=${rowsPerPage}${withSearch}${withCategory}`;
+  return `${baseEndpoint}?page=${page}&perPage=${rowsPerPage}${withSearch}${withCategory}`;
 };
 
 const getBaseEndpoint = (page = 1, rowsPerPage = 10) =>
@@ -314,6 +314,7 @@ export default function TablePaginationWithApi() {
           count={data?.totalItems ?? 0}
           onRowsPerPageChange={handleChangeRowsPerPage}
           rowsPerPageOptions={[10, 25, 50]}
+          onChangeDense={table.onChangeDense}
         />
       </Paper>
       <EditProduceItemDialog

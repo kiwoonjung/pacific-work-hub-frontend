@@ -61,7 +61,7 @@ export function MsalAuthProvider({ children }: Props) {
           }
 
           const userData = await userResponse.json();
-          console.log('userData', userData);
+          // console.log('userData', userData);
 
           // Try to fetch user's profile photo
           let photoURL = null;
@@ -83,6 +83,8 @@ export function MsalAuthProvider({ children }: Props) {
           const email = extractEmail(userData.mail || userData.userPrincipalName);
           const fullName = `${userData.givenName} ${userData.surname}`;
           const displayName = userData.givenName;
+          const firstName = userData.givenName;
+          const lastName = userData.surname;
           const azureId = userData.id; // Use this as the primary key in DB
           const jobTitle = userData.jobTitle || null;
           // Determine department based on email domain
@@ -96,12 +98,11 @@ export function MsalAuthProvider({ children }: Props) {
           const userPayload = {
             azure_id: azureId,
             email,
-            full_name: fullName,
-            display_name: displayName,
+            first_name: firstName,
+            last_name: lastName,
             photo_url: photoURL,
             job_title: jobTitle,
             department,
-            role: 'employee', // Default role (adjust as needed)
           };
 
           // 🔹 Send user data to the backend for update or insert
