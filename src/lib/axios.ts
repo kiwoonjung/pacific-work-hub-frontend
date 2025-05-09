@@ -7,7 +7,6 @@ import { CONFIG } from 'src/global-config';
 // ----------------------------------------------------------------------
 
 const axiosInstance = axios.create({ baseURL: CONFIG.serverUrl });
-console.log('axiosInstance', axiosInstance);
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => Promise.reject((error.response && error.response.data) || 'Something went wrong!')

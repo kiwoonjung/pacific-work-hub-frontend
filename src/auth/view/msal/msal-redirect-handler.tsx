@@ -8,7 +8,7 @@ export function MsalRedirectHandler() {
     const handleRedirect = async () => {
       // Only process redirect if we're in the middle of an interaction
       if (instance.getActiveAccount() || instance.getAllAccounts().length > 0) {
-        console.log('Skipping redirect handling - already authenticated');
+        // console.log('Skipping redirect handling - already authenticated');
         return;
       }
 
