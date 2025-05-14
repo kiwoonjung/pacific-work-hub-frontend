@@ -10,7 +10,7 @@ export const msalConfig = {
   auth: {
     clientId: import.meta.env.VITE_MSAL_CLIENT_ID, // This is the ONLY mandatory field that you need to supply.
     authority: `https://login.microsoftonline.com/${import.meta.env.VITE_MSAL_TENANT_ID.replace('https://', '')}`,
-    redirectUri: 'http://localhost:8081', // Points to window.location.origin. You must register this URI on Azure Portal/App Registration.
+    redirectUri: 'https://pacific-work-hub-frontend.vercel.app', // Points to window.location.origin. You must register this URI on Azure Portal/App Registration.
     postLogoutRedirectUri: '/', // Indicates the page to navigate after logout.
     navigateToLoginRequestUrl: false, // Changed to false for popup
   },
