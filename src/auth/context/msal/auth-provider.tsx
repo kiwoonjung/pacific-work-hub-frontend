@@ -7,6 +7,8 @@ import axiosInstance from 'src/lib/axios';
 import { AuthContext } from '../auth-context';
 
 import type { AuthState } from '../../types';
+
+import { loginRequest } from 'src/authConfig';
 // ----------------------------------------------------------------------
 
 type Props = {
@@ -29,6 +31,7 @@ export function MsalAuthProvider({ children }: Props) {
 
   useEffect(() => {
     const checkUserSession = async () => {
+      let objectUrl: string | null = null;
       try {
         if (accounts.length > 0) {
           const account = accounts[0];
@@ -73,7 +76,8 @@ export function MsalAuthProvider({ children }: Props) {
 
             if (photoResponse.ok) {
               const blob = await photoResponse.blob();
-              photoURL = URL.createObjectURL(blob);
+              objectUrl = URL.createObjectURL(blob);
+              photoURL = objectUrl;
             }
           } catch (err) {
             console.warn('Unable to fetch profile photo:', err);
@@ -132,6 +136,21 @@ export function MsalAuthProvider({ children }: Props) {
         console.error(error);
         setState({ user: null, loading: false });
       }
+
+      // 🔴 Cleanup: Revoke blob URL to avoid memory leak
+      return () => {
+        if (objectUrl) {
+          URL.revokeObjectURL(objectUrl);
+        }
+      };
+    };
+
+    const cleanup = checkUserSession();
+
+    return () => {
+      if (cleanup instanceof Function) {
+        cleanup();
+      }
     };
 
     checkUserSession();
@@ -140,12 +159,27 @@ export function MsalAuthProvider({ children }: Props) {
   const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';
   const status = state.loading ? 'loading' : checkAuthenticated;
 
+  const login = async () => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    try {
+      if (isMobile) {
+        await instance.loginRedirect(loginRequest);
+      } else {
+        await instance.loginPopup(loginRequest);
+      }
+    } catch (err) {
+      console.error('Login failed:', err);
+    }
+  };
+
   const memoizedValue = useMemo(
     () => ({
       user: state.user,
       loading: status === 'loading',
       authenticated: status === 'authenticated',
       unauthenticated: status === 'unauthenticated',
+      login,
     }),
     [state.user, status]
   );
