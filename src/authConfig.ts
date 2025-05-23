@@ -1,14 +1,13 @@
 import type { PopupRequest, Configuration } from '@azure/msal-browser';
 
 import { LogLevel } from '@azure/msal-browser';
-
 export const msalConfig: Configuration = {
   auth: {
     clientId: import.meta.env.VITE_MSAL_CLIENT_ID as string,
     authority: `https://login.microsoftonline.com/${(
       import.meta.env.VITE_MSAL_TENANT_ID as string
     ).replace('https://', '')}`,
-    redirectUri: 'http://localhost:8081',
+    redirectUri: import.meta.env.VITE_MSAL_REDIRECT_URL as string,
     postLogoutRedirectUri: '/',
     navigateToLoginRequestUrl: false,
   },
