@@ -1,6 +1,7 @@
 import type { PopupRequest, Configuration } from '@azure/msal-browser';
 
 import { LogLevel } from '@azure/msal-browser';
+
 export const msalConfig: Configuration = {
   auth: {
     clientId: import.meta.env.VITE_MSAL_CLIENT_ID as string,
