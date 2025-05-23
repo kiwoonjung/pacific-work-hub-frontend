@@ -1,14 +1,14 @@
 const originList = [
-  { label: 'China' },
-  { label: 'Vietnam' },
-  { label: 'Burma' },
-  { label: 'Taiwan' },
-  { label: 'Thailand' },
-  { label: 'Hawaii' },
-  { label: 'Mexico' },
-  { label: 'Canada - BC' },
-  { label: 'Japan' },
-  { label: 'S. Africa' },
+  { value: 'China' },
+  { value: 'Vietnam' },
+  { value: 'Burma' },
+  { value: 'Taiwan' },
+  { value: 'Thailand' },
+  { value: 'Hawaii' },
+  { value: 'Mexico' },
+  { value: 'Canada - BC' },
+  { value: 'Japan' },
+  { value: 'S. Africa' },
 ];
 
 export default originList;

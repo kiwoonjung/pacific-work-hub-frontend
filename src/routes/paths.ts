@@ -73,6 +73,44 @@ export const paths = {
    */
 
   pfp: {
-    produceList: `${ROOTS.PFP}/produce-list`,
+    root: `${ROOTS.PFP}`,
+    produce: {
+      root: `${ROOTS.PFP}/produces`,
+      list: `${ROOTS.PFP}/produces/list`,
+      create: `${ROOTS.PFP}/produces/create`,
+      edit: (id: string) => `${ROOTS.PFP}/produces/edit/${id}`,
+    },
+
+    receiving: {
+      root: `${ROOTS.PFP}/receiving`,
+      list: `${ROOTS.PFP}/receiving/list`,
+      create: `${ROOTS.PFP}/receiving/create`,
+    },
+
+    inventory: {
+      root: `${ROOTS.PFP}/inventory`,
+      list: `${ROOTS.PFP}/inventory/list`,
+      create: `${ROOTS.PFP}/inventory/create`,
+    },
+
+    shipping: {
+      root: `${ROOTS.PFP}/shipping`,
+      list: `${ROOTS.PFP}/shipping/list`,
+      create: `${ROOTS.PFP}/shipping/create`,
+    },
+
+    contact: {
+      root: `${ROOTS.PFP}/contact`,
+      customer: {
+        root: `${ROOTS.PFP}/contact/customer`,
+        list: `${ROOTS.PFP}/contact/customer/list`,
+        create: `${ROOTS.PFP}/contact/customer/create`,
+      },
+      client: {
+        root: `${ROOTS.PFP}/contact/client`,
+        list: `${ROOTS.PFP}/contact/client/list`,
+        create: `${ROOTS.PFP}/contact/client/create`,
+      },
+    },
   },
 };

@@ -4,7 +4,6 @@ import { paths } from 'src/routes/paths';
 
 import { CONFIG } from 'src/global-config';
 
-import { Label } from 'src/components/label';
 import { SvgColor } from 'src/components/svg-color';
 
 // ----------------------------------------------------------------------
@@ -40,7 +39,11 @@ const ICONS = {
   analytics: icon('ic-analytics'),
   dashboard: icon('ic-dashboard'),
   parameter: icon('ic-parameter'),
-  cart: icon('ic-cart'),
+  notebook: icon('solar--notebook-bold'),
+  import: icon('solar--import-bold'),
+  export: icon('solar--export-bold'),
+  box: icon('solar--box-bold'),
+  contact: icon('ic--baseline-contact-page'),
 };
 
 // ----------------------------------------------------------------------
@@ -80,29 +83,105 @@ export const navData: NavSectionProps['data'] = [
     subheader: 'Pacific Fresh Produce',
     items: [
       {
-        title: 'Produce List',
-        path: paths.pfp.produceList,
-        icon: ICONS.cart,
+        title: 'Produce',
+        path: paths.pfp.produce.root,
+        icon: ICONS.notebook,
+        children: [
+          {
+            title: 'List',
+            path: paths.pfp.produce.list,
+          },
+          {
+            title: 'Create',
+            path: paths.pfp.produce.create,
+          },
+        ],
       },
-      // {
-      //   title: 'Order',
-      //   path: paths.dashboard.two,
-      //   icon: ICONS.ecommerce,
-      //   children: [
-      //     { title: 'Recieved', path: paths.dashboard.two, icon: ICONS.ecommerce },
-      //     { title: 'Shipped', path: paths.dashboard.two, icon: ICONS.ecommerce },
-      //   ],
-      // },
-      // {
-      //   title: 'Contact',
-      //   path: paths.dashboard.two,
-      //   icon: ICONS.ecommerce,
-      //   children: [
-      //     { title: 'Cash Customer', path: paths.dashboard.two, icon: ICONS.ecommerce },
-      //     { title: 'PFP Client', path: paths.dashboard.two, icon: ICONS.ecommerce },
-      //   ],
-      // },
+      {
+        title: 'Receiving',
+        path: paths.pfp.receiving.root,
+        icon: ICONS.import,
+        children: [
+          {
+            title: 'List',
+            path: paths.pfp.receiving.list,
+          },
+          {
+            title: 'Create',
+            path: paths.pfp.receiving.create,
+          },
+        ],
+      },
+      {
+        title: 'Inventory',
+        path: paths.pfp.inventory.root,
+        icon: ICONS.box,
+        children: [
+          {
+            title: 'List',
+            path: paths.pfp.inventory.list,
+          },
+          {
+            title: 'Create',
+            path: paths.pfp.inventory.create,
+          },
+        ],
+      },
+      {
+        title: 'Shipping',
+        path: paths.pfp.shipping.root,
+        icon: ICONS.export,
+        children: [
+          {
+            title: 'List',
+            path: paths.pfp.shipping.list,
+          },
+          {
+            title: 'Create',
+            path: paths.pfp.shipping.create,
+          },
+        ],
+      },
+      {
+        title: 'Contact',
+        path: paths.pfp.contact.root,
+        icon: ICONS.contact,
+        children: [
+          {
+            title: 'Customer',
+            path: paths.pfp.contact.customer.root,
+            children: [
+              {
+                title: 'List',
+                path: paths.pfp.contact.customer.list,
+              },
+              {
+                title: 'Create',
+                path: paths.pfp.contact.customer.create,
+              },
+            ],
+          },
+          {
+            title: 'Client',
+            path: paths.pfp.contact.customer.root,
+            children: [
+              {
+                title: 'List',
+                path: paths.pfp.contact.client.list,
+              },
+              {
+                title: 'Create',
+                path: paths.pfp.contact.client.create,
+              },
+            ],
+          },
+        ],
+      },
     ],
+  },
+  {
+    subheader: 'Management',
+    items: [],
   },
 ];
 
