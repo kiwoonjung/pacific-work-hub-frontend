@@ -59,9 +59,16 @@ export function NavUpgrade({ sx, ...other }: BoxProps) {
           <Typography
             variant="subtitle2"
             noWrap
-            sx={{ mb: 1, color: 'var(--layout-nav-text-primary-color)' }}
+            sx={{ mb: 0, color: 'var(--layout-nav-text-primary-color)' }}
           >
             {user?.fullName}
+          </Typography>
+          <Typography
+            variant="body2"
+            noWrap
+            sx={{ mb: 1, color: 'var(--layout-nav-text-primary-color)' }}
+          >
+            {user?.jobTitle}
           </Typography>
 
           <Typography

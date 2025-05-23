@@ -61,7 +61,6 @@ export function MsalAuthProvider({ children }: Props) {
           }
 
           const userData = await userResponse.json();
-          // console.log('userData', userData);
 
           // Try to fetch user's profile photo
           let photoURL = null;
@@ -80,7 +79,9 @@ export function MsalAuthProvider({ children }: Props) {
             console.warn('Unable to fetch profile photo:', err);
           }
 
-          const email = extractEmail(userData.mail || userData.userPrincipalName);
+          const email = extractEmail(
+            userData.mail || userData.userPrincipalName
+          ).toLocaleLowerCase();
           const fullName = `${userData.givenName} ${userData.surname}`;
           const displayName = userData.givenName;
           const firstName = userData.givenName;
@@ -107,7 +108,7 @@ export function MsalAuthProvider({ children }: Props) {
 
           // 🔹 Send user data to the backend for update or insert
           try {
-            await axiosInstance.post('/api/user/create-user', userPayload);
+            await axiosInstance.post('/api/users', userPayload);
           } catch (err) {
             console.error('Failed to sync user with backend:', err);
           }
