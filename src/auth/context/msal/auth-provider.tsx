@@ -155,6 +155,19 @@ export function MsalAuthProvider({ children }: Props) {
     checkUserSession();
   }, [accounts, instance, setState]);
 
+  useEffect(() => {
+    instance
+      .handleRedirectPromise()
+      .then((response) => {
+        if (response) {
+          instance.setActiveAccount(response.account);
+        }
+      })
+      .catch((error) => {
+        console.error('Redirect login error:', error);
+      });
+  }, [instance]);
+
   const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';
   const status = state.loading ? 'loading' : checkAuthenticated;
 
@@ -165,7 +178,8 @@ export function MsalAuthProvider({ children }: Props) {
       if (isMobile) {
         await instance.loginRedirect(loginRequest);
       } else {
-        await instance.loginPopup(loginRequest);
+        const response = await instance.loginPopup(loginRequest);
+        instance.setActiveAccount(response.account);
       }
     } catch (err) {
       console.error('Login failed:', err);
