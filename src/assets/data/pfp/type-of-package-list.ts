@@ -1,10 +1,10 @@
 const packageTypeList = [
-  { label: 'Cardboard Box' },
-  { label: 'Net Mesh Bag' },
-  { label: 'Vacuum Pack' },
-  { label: 'Plastic Jar' },
-  { label: 'Clamshell Pkg' },
-  { label: 'Styrofoam Box' },
+  { value: 'Cardboard Box' },
+  { value: 'Net Mesh Bag' },
+  { value: 'Vacuum Pack' },
+  { value: 'Plastic Jar' },
+  { value: 'Clamshell Pkg' },
+  { value: 'Styrofoam Box' },
 ];
 
 export default packageTypeList;

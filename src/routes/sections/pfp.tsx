@@ -14,7 +14,9 @@ import { usePathname } from '../hooks';
 
 // ----------------------------------------------------------------------
 
-const IndexPage = lazy(() => import('src/pages/pfp/produce-list/produce-list'));
+const ProduceListPage = lazy(() => import('src/pages/pfp/produce/list'));
+const ProduceCreatePage = lazy(() => import('src/pages/pfp/produce/create'));
+const EditProducePage = lazy(() => import('src/pages/pfp/produce/edit'));
 
 // ----------------------------------------------------------------------
 
@@ -37,6 +39,24 @@ export const pfpRoutes: RouteObject[] = [
   {
     path: 'pfp',
     element: CONFIG.auth.skip ? dashboardLayout() : <AuthGuard>{dashboardLayout()}</AuthGuard>,
-    children: [{ path: 'produce-list', element: <IndexPage />, index: true }],
+    children: [
+      {
+        path: 'produces',
+        children: [
+          {
+            path: 'list',
+            element: <ProduceListPage />,
+          },
+          {
+            path: 'create',
+            element: <ProduceCreatePage />,
+          },
+          {
+            path: 'edit/:id',
+            element: <EditProducePage />,
+          },
+        ],
+      },
+    ],
   },
 ];

@@ -71,14 +71,18 @@ export const endpoints = {
 
   /////
 
-  produce: {
-    list: '/api/pfp/produce/get-produce-items',
-    create: '/api/pfp/produce/create-produce-item',
-    update: '/api/pfp/produce/update-produce-item',
-    delete: '/api/pfp/produce/delete-single-produce-item',
+  // pfp: {
+  //   produce: {
+  //     list: '/api/pfp/produce',
+  //     create: '/api/pfp/produce',
+  //     update: '/api/pfp/produce/produce-item',
+  //     delete: '/api/pfp/produce/produce-item',
+  //   },
+  // },
+
+  pfp: {
+    produce: '/api/pfp/produces',
   },
 
-  user: {
-    create: '/api/user/create-user',
-  },
+  user: '/api/users',
 };

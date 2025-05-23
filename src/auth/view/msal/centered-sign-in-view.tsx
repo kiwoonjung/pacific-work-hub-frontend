@@ -55,9 +55,9 @@ export function CenteredSignInView() {
   // };
 
   const handleLoginPopup = async () => {
-    console.log('Starting popup login...');
+    // console.log('Starting popup login...');
     if (isLoading) {
-      console.log('Login already in progress, returning...');
+      // console.log('Login already in progress, returning...');
       return;
     }
 
@@ -67,46 +67,46 @@ export function CenteredSignInView() {
       // Check if we're already authenticated
       const accounts = instance.getAllAccounts();
       if (accounts.length > 0) {
-        console.log('Already authenticated with account:', accounts[0].username);
+        // console.log('Already authenticated with account:', accounts[0].username);
         instance.setActiveAccount(accounts[0]);
         // navigate(paths.dashboard.root);
         return;
       }
 
-      console.log('No active accounts, proceeding with login...');
+      // console.log('No active accounts, proceeding with login...');
 
       // Clear any existing state
       await instance.clearCache();
-      console.log('Cache cleared');
+      // console.log('Cache cleared');
 
       // Handle any pending popups first
       const popupResponse = await instance.handleRedirectPromise();
       if (popupResponse) {
-        console.log('Found popup response:', popupResponse);
+        // console.log('Found popup response:', popupResponse);
         instance.setActiveAccount(popupResponse.account);
         // navigate(paths.dashboard.root);
         return;
       }
 
-      console.log('Starting popup login...');
+      // console.log('Starting popup login...');
       const response = await instance.loginPopup(loginRequest);
 
-      console.log('Login popup completed:', response);
+      // console.log('Login popup completed:', response);
       instance.setActiveAccount(response.account);
       // navigate(paths.dashboard.root);
     } catch (error) {
-      console.error('Authentication error:', error);
+      // console.error('Authentication error:', error);
       if (
         error instanceof Error &&
         error.name === 'BrowserAuthError' &&
         error.message.includes('interaction_in_progress')
       ) {
-        console.log('Found existing interaction, attempting to clear it...');
+        // console.log('Found existing interaction, attempting to clear it...');
         try {
           await instance.clearCache();
-          console.log('Cache cleared for retry');
+          // console.log('Cache cleared for retry');
           const response = await instance.loginPopup(loginRequest);
-          console.log('Retry login popup completed:', response);
+          // console.log('Retry login popup completed:', response);
           instance.setActiveAccount(response.account);
           // navigate(paths.dashboard.root);
         } catch (retryError) {
@@ -151,7 +151,7 @@ export function CenteredSignInView() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      console.info('DATA', data);
+      // console.info('DATA', data);
     } catch (error) {
       console.error(error);
     }
