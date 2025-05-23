@@ -3,12 +3,11 @@ import { useMsal } from '@azure/msal-react';
 import { useSetState } from 'minimal-shared/hooks';
 
 import axiosInstance from 'src/lib/axios';
+import { loginRequest } from 'src/authConfig';
 
 import { AuthContext } from '../auth-context';
 
 import type { AuthState } from '../../types';
-
-import { loginRequest } from 'src/authConfig';
 // ----------------------------------------------------------------------
 
 type Props = {
